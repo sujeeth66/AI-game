@@ -1,0 +1,108 @@
+[gd_scene load_steps=18 format=3 uid="uid://c5srnthpdgxkd"]
+
+[ext_resource type="Script" uid="uid://c114egsrtpl8w" path="res://quest system/scripts/npc.gd" id="1_w7q8e"]
+[ext_resource type="Texture2D" uid="uid://ttbixundd23b" path="res://textures/knight.png" id="2_hhgrx"]
+[ext_resource type="Script" uid="uid://d2ycru2ofn76u" path="res://quest system/Resources/Dialog/Dialog.gd" id="2_s7qxf"]
+[ext_resource type="Script" uid="uid://cf8wf7o6vqcv7" path="res://quest system/Resources/Quest/Quest.gd" id="3_j7185"]
+[ext_resource type="Script" uid="uid://dwice8iy7ng3d" path="res://quest system/Resources/Quest/Objectives.gd" id="4_q2dtu"]
+[ext_resource type="PackedScene" uid="uid://du4xedjm7ranf" path="res://quest system/scenes/Dialogs/DialogManager.tscn" id="4_ukla7"]
+[ext_resource type="Script" uid="uid://5dvtjkl50wsh" path="res://quest system/Resources/Quest/Rewards.gd" id="5_dyi6q"]
+
+[sub_resource type="Resource" id="Resource_ukla7"]
+script = ExtResource("2_s7qxf")
+dialogs = {}
+metadata/_custom_type_script = "uid://d2ycru2ofn76u"
+
+[sub_resource type="Resource" id="Resource_agals"]
+script = ExtResource("4_q2dtu")
+id = ""
+description = ""
+target_name = ""
+objective_type = ""
+objective_dialog = ""
+required_quantity = 0
+collected_quantity = 0
+is_completed = false
+metadata/_custom_type_script = "uid://dwice8iy7ng3d"
+
+[sub_resource type="Resource" id="Resource_n0xip"]
+script = ExtResource("5_dyi6q")
+reward_type = ""
+reward_amount = 1
+metadata/_custom_type_script = "uid://5dvtjkl50wsh"
+
+[sub_resource type="Resource" id="Resource_hbh4p"]
+script = ExtResource("3_j7185")
+quest_id = ""
+quest_name = ""
+quest_description = ""
+state = "not_started"
+unlock_id = ""
+objectives = Array[ExtResource("4_q2dtu")]([SubResource("Resource_agals")])
+rewards = Array[ExtResource("5_dyi6q")]([SubResource("Resource_n0xip")])
+metadata/_custom_type_script = "uid://cf8wf7o6vqcv7"
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_na60n"]
+atlas = ExtResource("2_hhgrx")
+region = Rect2(0, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g4hew"]
+atlas = ExtResource("2_hhgrx")
+region = Rect2(32, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1gfjy"]
+atlas = ExtResource("2_hhgrx")
+region = Rect2(64, 0, 32, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_jpo3g"]
+atlas = ExtResource("2_hhgrx")
+region = Rect2(96, 0, 32, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_ax5s6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_na60n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g4hew")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1gfjy")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_jpo3g")
+}],
+"loop": true,
+"name": &"default",
+"speed": 15.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_8276k"]
+radius = 6.0
+height = 18.0
+
+[node name="Npc" type="CharacterBody2D" groups=["NPC"]]
+collision_layer = 8
+collision_mask = 8
+script = ExtResource("1_w7q8e")
+dialog_resource = SubResource("Resource_ukla7")
+quests = Array[ExtResource("3_j7185")]([SubResource("Resource_hbh4p")])
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_ax5s6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
+shape = SubResource("CapsuleShape2D_8276k")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -2.0
+offset_top = -27.0
+offset_right = 3.0
+offset_bottom = -4.0
+theme_override_colors/font_color = Color(1, 0, 0, 1)
+theme_override_font_sizes/font_size = 15
+text = "!"
+
+[node name="DialogManager" parent="." instance=ExtResource("4_ukla7")]

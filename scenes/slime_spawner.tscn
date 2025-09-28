@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://dmj5xatxwxxnv"]
+
+[ext_resource type="Script" uid="uid://bw0e3ig4p2mqb" path="res://scripts/slime_spawner.gd" id="1_5n80e"]
+[ext_resource type="PackedScene" uid="uid://b27fsdj7elec3" path="res://scenes/slime.tscn" id="2_vyqvs"]
+[ext_resource type="Texture2D" uid="uid://c4mpetthhtwys" path="res://icon.svg" id="3_wepud"]
+
+[node name="Node2D" type="Node2D"]
+scale = Vector2(0.5, 0.5)
+script = ExtResource("1_5n80e")
+slime_scene = ExtResource("2_vyqvs")
+spawn_key = 81
+spawn_cooldown = 0.5
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(0.305159, 0.27088)
+texture = ExtResource("3_wepud")
