@@ -1,0 +1,133 @@
+[gd_scene load_steps=19 format=4 uid="uid://c6pac84kvdmw6"]
+
+[ext_resource type="Script" uid="uid://b6y3myym5ym5" path="res://scripts/main.gd" id="1_08kqv"]
+[ext_resource type="PackedScene" uid="uid://bfbwkogkdn0jn" path="res://scenes/player.tscn" id="2_rnjyy"]
+[ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="3_4vge2"]
+[ext_resource type="TileSet" uid="uid://b5w6h4x5y1w7f" path="res://textures/world.tres" id="3_tileset"]
+[ext_resource type="PackedScene" uid="uid://dmj5xatxwxxnv" path="res://scenes/slime_spawner.tscn" id="4_4vge2"]
+[ext_resource type="Script" uid="uid://cf8wf7o6vqcv7" path="res://quest system/Resources/Quest/Quest.gd" id="7_f6ptj"]
+[ext_resource type="PackedScene" uid="uid://c5srnthpdgxkd" path="res://quest system/scenes/NPC.tscn" id="8_3m5ht"]
+[ext_resource type="Script" uid="uid://dwice8iy7ng3d" path="res://quest system/Resources/Quest/Objectives.gd" id="8_hsdmi"]
+[ext_resource type="Script" uid="uid://5dvtjkl50wsh" path="res://quest system/Resources/Quest/Rewards.gd" id="9_ifa78"]
+[ext_resource type="PackedScene" uid="uid://3sl0pg6mnoc5" path="res://inventory/scenes/game_item.tscn" id="10_08kqv"]
+[ext_resource type="Texture2D" uid="uid://b78rew4eowg6y" path="res://textures/apple_icon.png" id="11_f6ptj"]
+
+[sub_resource type="Resource" id="Resource_f6ptj"]
+script = ExtResource("8_hsdmi")
+id = "npc_talk_01"
+description = "beef"
+target_name = "gasagasalu"
+objective_type = "talk_to"
+objective_dialog = "beef is sooo good"
+required_quantity = 0
+collected_quantity = 0
+is_completed = false
+metadata/_custom_type_script = "uid://dwice8iy7ng3d"
+
+[sub_resource type="Resource" id="Resource_hsdmi"]
+script = ExtResource("8_hsdmi")
+id = "obj_collect_1"
+description = "Collect 1 raw chicken leg"
+target_name = "raw_chicken"
+objective_type = "collection"
+objective_dialog = ""
+required_quantity = 10
+collected_quantity = 0
+is_completed = false
+metadata/_custom_type_script = "uid://dwice8iy7ng3d"
+
+[sub_resource type="Resource" id="Resource_ifa78"]
+script = ExtResource("9_ifa78")
+reward_type = "coins"
+reward_amount = 50
+metadata/_custom_type_script = "uid://5dvtjkl50wsh"
+
+[sub_resource type="Resource" id="Resource_3kg8w"]
+script = ExtResource("7_f6ptj")
+quest_id = "npc_quest_1"
+quest_name = "Happy Days"
+quest_description = "Talk to gasagasalu about cooking chicken"
+state = "not_started"
+unlock_id = "npc_1_1"
+objectives = Array[ExtResource("8_hsdmi")]([SubResource("Resource_f6ptj"), SubResource("Resource_hsdmi")])
+rewards = Array[ExtResource("9_ifa78")]([SubResource("Resource_ifa78")])
+metadata/_custom_type_script = "uid://cf8wf7o6vqcv7"
+
+[sub_resource type="Resource" id="Resource_xtx0q"]
+script = ExtResource("8_hsdmi")
+id = "talk_npc_1"
+description = "Talk to daniel"
+target_name = "Daniel"
+objective_type = "talk_to"
+objective_dialog = "you just deep fry the legs in some oil"
+required_quantity = 0
+collected_quantity = 0
+is_completed = false
+metadata/_custom_type_script = "uid://dwice8iy7ng3d"
+
+[sub_resource type="Resource" id="Resource_x63s8"]
+script = ExtResource("9_ifa78")
+reward_type = "coins"
+reward_amount = 100
+metadata/_custom_type_script = "uid://5dvtjkl50wsh"
+
+[sub_resource type="Resource" id="Resource_0q20i"]
+script = ExtResource("7_f6ptj")
+quest_id = "npc_2_quest_1"
+quest_name = "tasty chicken"
+quest_description = "Ask daniel to tell about chicken cooking"
+state = "not_started"
+unlock_id = "npc_2_1"
+objectives = Array[ExtResource("8_hsdmi")]([SubResource("Resource_xtx0q")])
+rewards = Array[ExtResource("9_ifa78")]([SubResource("Resource_x63s8")])
+metadata/_custom_type_script = "uid://cf8wf7o6vqcv7"
+
+[node name="Node2D" type="Node2D"]
+script = ExtResource("1_08kqv")
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+visible = false
+position = Vector2(500, 300)
+enabled = false
+script = ExtResource("3_4vge2")
+
+[node name="TileMapLayer" type="TileMapLayer" parent="."]
+scale = Vector2(1.02587, 1.01297)
+tile_map_data = PackedByteArray("AADk/wIAAAAAAAAAAADl/wIAAAAAAAAAAADm/wIAAAAAAAAAAADn/wIAAAAAAAAAAADo/wIAAAAAAAAAAADp/wIAAAAAAAAAAADq/wIAAAAAAAAAAADr/wIAAAAAAAAAAADs/wIAAAAAAAAAAADt/wIAAAAAAAAAAADu/wIAAAAAAAAAAADv/wIAAAAAAAAAAADw/wIAAAAAAAAAAADx/wMAAAAAAAAAAADy/wMAAAAAAAAAAADz/wMAAAAAAAAAAAD0/wMAAAAAAAAAAAD1/wMAAAAAAAAAAAD2/wMAAAAAAAAAAAD3/wMAAAAAAAAAAAD4/wMAAAAAAAAAAAD5/wMAAAAAAAAAAAD6/wMAAAAAAAAAAAD7/wMAAAAAAAAAAAD8/wMAAAAAAAAAAAD9/wMAAAAAAAAAAAD+/wMAAAAAAAAAAAD//wMAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAAAAAAAAAAEAAMAAAAAAAAAAAAFAAMAAAAAAAAAAAAGAAMAAAAAAAAAAAAHAAMAAAAAAAAAAAAIAAMAAAAAAAAAAAAJAAMAAAAAAAAAAAAKAAQAAAAAAAAAAAALAAQAAAAAAAAAAAAMAAQAAAAAAAAAAAANAAQAAAAAAAAAAAAOAAQAAAAAAAAAAAAPAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAARAAQAAAAAAAAAAAASAAQAAAAAAAAAAAATAAQAAAAAAAAAAAAUAAQAAAAAAAAAAAAVAAQAAAAAAAAAAAAWAAQAAAAAAAAAAAAXAAQAAAAAAAAAAAAYAAQAAAAAAAAAAAAZAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAAbAAQAAAAAAAAAAAAcAAQAAAAAAAAAAAAdAAQAAAAAAAAAAAAeAAQAAAAAAAAAAAAfAAQAAAAAAAAAAAAgAAQAAAAAAAAAAAAhAAQAAAAAAAAAAAAiAAQAAAAAAAAAAAAjAAUAAAAAAAAAAAAkAAUAAAAAAAAAAAAlAAUAAAAAAAAAAAAmAAUAAAAAAAAAAAAnAAUAAAAAAAAAAAAoAAUAAAAAAAAAAAApAAUAAAAAAAAAAAAqAAUAAAAAAAAAAAArAAUAAAAAAAAAAAAsAAUAAAAAAAAAAAAtAAUAAAAAAAAAAAAuAAUAAAAAAAAAAAAvAAUAAAAAAAAAAAAwAAUAAAAAAAAAAAAxAAQAAAAAAAAAAAAxAAMAAAAAAAAAAAAyAAIAAAAAAAAAAAAyAAEAAAAAAAAAAAAzAAAAAAAAAAAAAAA0AP//AAAAAAAAAAA0AP7/AAAAAAAAAAA1AP3/AAAAAAAAAAA1APz/AAAAAAAAAAA2APv/AAAAAAAAAAA3APr/AAAAAAAAAAA3APn/AAAAAAAAAAA4APj/AAAAAAAAAAA5APf/AAAAAAAAAAA5APb/AAAAAAAAAAA6APX/AAAAAAAAAAA6APT/AAAAAAAAAAA7APP/AAAAAAAAAAASAAMAAAAAAAAAAAASAAIAAAAAAAAAAAASAAEAAAAAAAAAAAA=")
+tile_set = ExtResource("3_tileset")
+
+[node name="DecorLayer" type="TileMapLayer" parent="."]
+tile_set = ExtResource("3_tileset")
+
+[node name="Player" parent="." instance=ExtResource("2_rnjyy")]
+top_level = true
+position = Vector2(193, -289)
+scale = Vector2(2, 2)
+
+[node name="slime_spawner" parent="." instance=ExtResource("4_4vge2")]
+position = Vector2(543, 55)
+spawn_cooldown = 0.1
+
+[node name="Items" type="Node2D" parent="."]
+
+[node name="Npc" parent="." instance=ExtResource("8_3m5ht")]
+position = Vector2(269, 50)
+npc_id = "npc_1"
+npc_name = "Daniel"
+quests = Array[ExtResource("7_f6ptj")]([SubResource("Resource_3kg8w")])
+
+[node name="Npc2" parent="." instance=ExtResource("8_3m5ht")]
+position = Vector2(-131, 32)
+npc_id = "npc_2"
+npc_name = "gasagasalu"
+quests = Array[ExtResource("7_f6ptj")]([SubResource("Resource_0q20i")])
+
+[node name="GameItem" parent="." instance=ExtResource("10_08kqv")]
+position = Vector2(-78, 28)
+item_quantity = 10
+item_type = "quest_item"
+item_name = "apple"
+item_texture = ExtResource("11_f6ptj")
+item_effect = "heal - 100"
