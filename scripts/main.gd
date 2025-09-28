@@ -23,30 +23,6 @@ var current_point: Vector2i = Vector2i(0, 0)
 var jump_height: int = 3  # 🦘 Max vertical step allowed between adjacent tiles
 
 func _ready() -> void:
-	# Performance monitor disabled
-	# add_child(performance_monitor)
-	
-	# Set up TileMap collision layers through the TileSet
-	if has_node("TileMapLayer"):
-		var tile_map_layer = $TileMapLayer
-		var tile_set = tile_map_layer.tile_set
-		if tile_set:
-			# Make sure we have at least one physics layer
-			if tile_set.get_physics_layers_count() == 0:
-				tile_set.add_physics_layer()
-			# Set the collision layer and mask for the first physics layer
-			tile_set.set_physics_layer_collision_layer(0, 1)  # Layer 1
-			tile_set.set_physics_layer_collision_mask(0, 1)   # Collide with layer 1
-			
-			# For Godot 4, we need to use the TileSet editor to set up collisions
-			# This is a one-time setup that needs to be done in the editor
-			# The script will just ensure the layers are set correctly
-			print("✅ Configured TileMapLayer physics layers. Make sure to set up tile collisions in the TileSet editor.")
-			print("  1. Select the TileMapLayer in the Scene panel")
-			print("  2. Click on the 'TileSet' tab in the bottom panel")
-			print("  3. Select a tile and add a collision shape in the 'Physics' section")
-			print("  4. Repeat for all terrain tiles that should have collision")
-
 	# Load player scene with error checking
 	if not player_scene:
 		print("⚠️ Player scene not set in inspector, attempting to load directly...")
@@ -59,11 +35,12 @@ func _ready() -> void:
 	if http_request:
 		http_request.request_completed.connect(_on_request_completed)
 		print("📡 HTTPRequest signal connected")
-		generate_from_lore("a rugged mountainous terrain with steep slopes and many hills...")
+		generate_map_blueprint_from_lore("a rugged mountainous terrain with steep slopes and many hills...")
 	else:
 		push_error("❌ HTTPRequest node not found!")
 
-func generate_from_lore(lore: String) -> void:
+#send lore to mapper AI to get the map blueprint
+func generate_map_blueprint_from_lore(lore: String) -> void:
 	var payload := { "lore": lore }
 	var headers := ["Content-Type: application/json"]
 	var body := JSON.stringify(payload)
@@ -181,7 +158,7 @@ func build_map(chunks: Array) -> void:
 				chunk = chunk_builder1.build_flat_chunk(terrain_tilemap, decor_tilemap, biome, current_point, distance)
 			
 			"UpSlopeChunk":
-				chunk = chunk_builder1.build_up_chunk_with_slope(terrain_tilemap, decor_tilemap, biome, current_point, -slope, distance, jump_height)
+				chunk = chunk_builder1.build_up_chunk_with_slope(terrain_tilemap, decor_tilemap, biome, current_point, slope, distance, jump_height)
 			
 			"DownSlopeChunk":
 				chunk = chunk_builder1.build_down_chunk_with_slope(terrain_tilemap, decor_tilemap, biome, current_point, slope, distance, jump_height)

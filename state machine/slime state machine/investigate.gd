@@ -45,7 +45,6 @@ func physics_update(_delta: float) -> void:
 		return
 
 	if search_phase == 0:
-		print("initial phase")
 		# Move toward the last known player position
 		var direction = sign(search_origin.x - slime.global_position.x)
 		slime.velocity.x = direction * slime.RUN_SPEED
@@ -75,7 +74,6 @@ func physics_update(_delta: float) -> void:
 				search_direction *= -1
 				is_waiting = true
 				search_phase += 1
-				print("is_waiting = true")
 				phase_delay_timer = phase_delay
 				slime.velocity.x = 0
 				#update variables
