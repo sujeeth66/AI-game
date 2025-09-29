@@ -89,6 +89,7 @@ script = ExtResource("1_ya4ey")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(500, 300)
+zoom = Vector2(0.25, 0.25)
 script = ExtResource("5_tbgi4")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
