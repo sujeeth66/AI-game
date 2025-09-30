@@ -13,7 +13,10 @@ func _ready():
 	initialize_empty_grid()
 	generate_top_layer(surface_grid, seed, smoothness)
 	var tunnel_path = carve_sideways_tunnel(underground_grid)
-	roughen_tunnel_roof(underground_grid)  # deform the ceiling after carving
+	#roughen_tunnel_roof(underground_grid)
+	#roughen_tunnel_floor_with_moore(underground_grid)  # new floor erosion pass
+	#for i in range(2):
+		#cleanup_floating_tiles(underground_grid)
 	tilemap.clear()
 	draw_grid_to_tilemap(surface_grid)
 	draw_grid_to_tilemap(underground_grid,map_height-36)
@@ -53,11 +56,11 @@ func generate_top_layer(grid, seed, smoothness := 20.0, cutoff := 35):
 
 func carve_sideways_tunnel(
 	grid,
-	start_y := 80,
+	start_y := 70,
 	length := 200,
-	tunnel_width := 8,
-	min_path_width := 5,
-	max_path_width := 10,
+	tunnel_width := 12,
+	min_path_width := 8,
+	max_path_width := 15,
 	roughness := 0.2,
 	curvyness := 0.3,
 	max_path_change := 2
@@ -99,23 +102,63 @@ func carve_sideways_tunnel(
 			y = clamp(y, 1, map_height - 2)
 
 	return path
-	
-func roughen_tunnel_roof(grid, seed := 54321, max_lift := 3):
-	var noise = FastNoiseLite.new()
-	noise.seed = seed + 2
-	noise.frequency = 0.1
+
+func roughen_tunnel_roof(grid, seed := 54321, max_lift := 3): 
+	var noise = FastNoiseLite.new() 
+	noise.seed = seed + 2 
+	noise.frequency = 0.1 
 	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	for x in range(map_width):
+		for y in range(map_height):		
+			if grid[y][x] == 0:			
+				# Found ceiling			
+				var raw = noise.get_noise_2d(x, 0)			
+				var lift = int((raw * 0.5 + 0.5) * max_lift)  # normalize to [0,1]			
+				for i in range(1, lift + 1):				
+					var ny = clamp(y - i, 0, map_height - 1)				
+					grid[ny][x] = 1  # fill with solid				
+					print("yoyo")			
+				break  # move to next column
+
+func cleanup_floating_tiles(grid, threshold := 5):
+	var new_grid := []
+	for y in range(map_height):
+		var row := []
+		for x in range(map_width):
+			var count := 0
+			for dy in range(-1, 2):
+				for dx in range(-1, 2):
+					if dx == 0 and dy == 0:
+						continue
+					var nx = clamp(x + dx, 0, map_width - 1)
+					var ny = clamp(y + dy, 0, map_height - 1)
+					if grid[ny][nx] == 1:
+						count += 1
+			# Keep tile only if enough solid neighbors
+			if grid[y][x] == 1 and count >= threshold:
+				row.append(1)
+			else:
+				row.append(0)
+		new_grid.append(row)
+	# Copy back
+	for y in range(map_height):
+		for x in range(map_width):
+			grid[y][x] = new_grid[y][x]
+
+func roughen_tunnel_floor_with_moore(grid, seed := 98765, chance := 0.4):
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed
 
 	for x in range(map_width):
-		for y in range(map_height):
+		for y in range(map_height - 1, -1, -1):
 			if grid[y][x] == 0:
-				# Found ceiling
-				var raw = noise.get_noise_2d(x, 0)
-				var lift = int((raw * 0.5 + 0.5) * max_lift)  # normalize to [0,1]
-				for i in range(1, lift + 1):
-					var ny = clamp(y - i, 0, map_height - 1)
-					grid[ny][x] = 1  # fill with solid
-					print("yoyo")
+				# Found floor
+				for dy in range(-1, 2):
+					for dx in range(-1, 2):
+						var nx = clamp(x + dx, 0, map_width - 1)
+						var ny = clamp(y + dy, 0, map_height - 1)
+						if grid[ny][nx] == 1 and rng.randf() < chance:
+							grid[ny][nx] = 0  # erode solid tile
 				break  # move to next column
 
 func carve_random_walk(
