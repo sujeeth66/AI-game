@@ -5,17 +5,9 @@ extends Node2D
 var random_state := RandomNumberGenerator.new()
 var noise_grid = []
 var map = {
-	"height": 300,
-	"width": 100
+	"height": 100,
+	"width": 300
 }
-
-var perlin := FastNoiseLite.new()
-
-func setup_perlin(seed := 123456, octaves := 4, persistence := 0.5, scale := 0.05):
-	perlin.seed = seed
-	perlin.octaves = octaves
-	perlin.persistence = persistence
-	perlin.period = 1.0 / scale
 
 func _ready() -> void:
 	randomize_with_seed(123456)
@@ -23,15 +15,14 @@ func _ready() -> void:
 	smooth_grid(noise_grid)
 	apply_cellular_automaton(noise_grid, 6)
 	enforce_minimum_girth(noise_grid, 3 , 5)
-	remove_floating_islands(noise_grid, 30)  # removes islands smaller than 50 tiles
+	remove_floating_islands(noise_grid, 30)
 	draw_tilemap(noise_grid)
-
+	
+	
 func randomize_with_seed(seed_value):
 	var state = RandomNumberGenerator.new()
 	state.seed = seed_value
-	# Store it globally if needed
 	random_state = state
-
 
 func make_noise_grid(density):
 	for y in range(map["height"]):
@@ -51,7 +42,7 @@ func make_noise_grid(density):
 func smooth_grid(grid):
 	var temp_grid = []
 	for y in range(map["height"]):
-		temp_grid.append(grid[y].duplicate())  # deep copy
+		temp_grid.append(grid[y].duplicate())
 
 	for y in range(map["height"]):
 		for x in range(map["width"]):
@@ -64,17 +55,18 @@ func smooth_grid(grid):
 						if temp_grid[ny][nx] == 1:
 							wall_neighbors += 1
 
-			# Smoothing rule: flip isolated walls or floors
 			if wall_neighbors < 3:
-				grid[y][x] = 0  # too few walls → become floor
+				grid[y][x] = 0
 			elif wall_neighbors > 5:
-				grid[y][x] = 1  # surrounded by walls → stay wall
+				grid[y][x] = 1
+
+
 
 func apply_cellular_automaton(grid, count):
 	for i in range(count):
 		var temp_grid = []
 		for y in range(map["height"]):
-			temp_grid.append(grid[y].duplicate())  # deep copy
+			temp_grid.append(grid[y].duplicate())
 
 		for y in range(map["height"]):
 			for x in range(map["width"]):
@@ -97,24 +89,12 @@ func apply_cellular_automaton(grid, count):
 func is_within_map_bounds(x, y):
 	return x >= 0 and x < map["width"] and y >= 0 and y < map["height"]
 
-func apply_top_layer(grid, top_min := 10, top_max := 50):
-	for x in range(map["width"]):
-		var top_y = int(lerp(top_min, top_max, perlin.get_noise_1d(x)))
-		for y in range(top_y):
-			grid[y][x] = 1  # force wall above top_y
-
-func apply_bottom_layer(grid, bottom_min := 250, bottom_max := 290):
-	for x in range(map["width"]):
-		var bottom_y = int(lerp(bottom_min, bottom_max, perlin.get_noise_1d(x + 1000)))  # offset for variation
-		for y in range(bottom_y + 1, map["height"]):
-			grid[y][x] = 1  # force wall below bottom_y
-
 func draw_tilemap(grid):
-	for x in range(grid.size()):
-		for y in range(grid[x].size()):
-			if grid[x][y] == 1:
-				tilemap.set_cell(Vector2i(x,y),0,Vector2i(0,0))
-			
+	for y in range(grid.size()):
+		for x in range(grid[y].size()):
+			if grid[y][x]:
+				tilemap.set_cell(Vector2i(x, y), 0, Vector2i(0, 0))
+
 func label_regions(grid):
 	var visited = []
 	for y in range(map["height"]):
@@ -171,11 +151,9 @@ func enforce_minimum_girth_vertical(grid, min_height := 3):
 				open_run += 1
 			else:
 				if open_run > 0 and open_run < min_height:
-					# Not enough vertical space — widen it by carving neighbors
 					for i in range(y - open_run, y):
 						widen_cell(grid, x, i)
 				open_run = 0
-		# Handle bottom edge
 		if open_run > 0 and open_run < min_height:
 			for i in range(map["height"] - open_run, map["height"]):
 				widen_cell(grid, x, i)
@@ -188,11 +166,9 @@ func enforce_minimum_girth_horizontal(grid, min_width := 3):
 				open_run += 1
 			else:
 				if open_run > 0 and open_run < min_width:
-					# Not enough horizontal space — widen it by carving neighbors
 					for i in range(x - open_run, x):
 						widen_cell(grid, i, y)
 				open_run = 0
-		# Handle right edge
 		if open_run > 0 and open_run < min_width:
 			for i in range(map["width"] - open_run, map["width"]):
 				widen_cell(grid, i, y)
@@ -203,4 +179,4 @@ func widen_cell(grid, x, y):
 			var nx = x + dx
 			var ny = y + dy
 			if is_within_map_bounds(nx, ny):
-				grid[ny][nx] = 0  # carve to floor
+				grid[ny][nx] = 0
