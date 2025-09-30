@@ -9,13 +9,21 @@ var map = {
 	"width": 100
 }
 
+var perlin := FastNoiseLite.new()
+
+func setup_perlin(seed := 123456, octaves := 4, persistence := 0.5, scale := 0.05):
+	perlin.seed = seed
+	perlin.octaves = octaves
+	perlin.persistence = persistence
+	perlin.period = 1.0 / scale
+
 func _ready() -> void:
 	randomize_with_seed(123456)
 	make_noise_grid(55)
 	smooth_grid(noise_grid)
 	apply_cellular_automaton(noise_grid, 6)
-	remove_floating_islands(noise_grid, 50)  # removes islands smaller than 20 tiles
-	enforce_minimum_girth(noise_grid, 3)
+	enforce_minimum_girth(noise_grid, 3 , 5)
+	remove_floating_islands(noise_grid, 30)  # removes islands smaller than 50 tiles
 	draw_tilemap(noise_grid)
 
 func randomize_with_seed(seed_value):
@@ -89,6 +97,18 @@ func apply_cellular_automaton(grid, count):
 func is_within_map_bounds(x, y):
 	return x >= 0 and x < map["width"] and y >= 0 and y < map["height"]
 
+func apply_top_layer(grid, top_min := 10, top_max := 50):
+	for x in range(map["width"]):
+		var top_y = int(lerp(top_min, top_max, perlin.get_noise_1d(x)))
+		for y in range(top_y):
+			grid[y][x] = 1  # force wall above top_y
+
+func apply_bottom_layer(grid, bottom_min := 250, bottom_max := 290):
+	for x in range(map["width"]):
+		var bottom_y = int(lerp(bottom_min, bottom_max, perlin.get_noise_1d(x + 1000)))  # offset for variation
+		for y in range(bottom_y + 1, map["height"]):
+			grid[y][x] = 1  # force wall below bottom_y
+
 func draw_tilemap(grid):
 	for x in range(grid.size()):
 		for y in range(grid[x].size()):
@@ -139,7 +159,11 @@ func remove_floating_islands(grid, min_size):
 			for pos in region:
 				grid[pos.y][pos.x] = 0
 
-func enforce_minimum_girth(grid, min_height := 3):
+func enforce_minimum_girth(grid, min_height := 3, min_width := 3):
+	enforce_minimum_girth_vertical(grid, min_height)
+	enforce_minimum_girth_horizontal(grid, min_width)
+
+func enforce_minimum_girth_vertical(grid, min_height := 3):
 	for x in range(map["width"]):
 		var open_run = 0
 		for y in range(map["height"]):
@@ -155,6 +179,23 @@ func enforce_minimum_girth(grid, min_height := 3):
 		if open_run > 0 and open_run < min_height:
 			for i in range(map["height"] - open_run, map["height"]):
 				widen_cell(grid, x, i)
+
+func enforce_minimum_girth_horizontal(grid, min_width := 3):
+	for y in range(map["height"]):
+		var open_run = 0
+		for x in range(map["width"]):
+			if grid[y][x] == 0:
+				open_run += 1
+			else:
+				if open_run > 0 and open_run < min_width:
+					# Not enough horizontal space — widen it by carving neighbors
+					for i in range(x - open_run, x):
+						widen_cell(grid, i, y)
+				open_run = 0
+		# Handle right edge
+		if open_run > 0 and open_run < min_width:
+			for i in range(map["width"] - open_run, map["width"]):
+				widen_cell(grid, i, y)
 
 func widen_cell(grid, x, y):
 	for dx in [-1, 0, 1]:
