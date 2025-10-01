@@ -14,7 +14,7 @@
 &emsp;&emsp;&emsp;09:38(pm)-forgot to commit and closed the browser.notes lost.time wasted.still trying to properly implement tunneling and random walk  
 &emsp;&emsp;&emsp;10:38-end 0f day  
 
-##Day-3(OCT 1,2025):  
+## Day-3(OCT 1,2025):  
 &emsp;&emsp;&emsp;10:02-start  
 &emsp;&emsp;&emsp;12:11-implemented tunnel entrance.moving on to tunnel room generation
 &emsp;&emsp;&emsp;
