@@ -21,7 +21,8 @@ func _ready():
 	smooth_tunnel(map_grid)
 	var closest_pos = find_min_surface_tunnel_distance(map_grid)
 	print("Closest surface-tunnel column at x =", closest_pos)
-	carve_cave_entrance(map_grid, closest_pos)
+	carve_cave_entrance(map_grid, Vector2i(closest_pos.x,closest_pos.y - 1),tunnel_path)
+	#carve_simple_random_walk(map_grid, Vector2i(168,59))
 		#carve_simple_random_walk(map_grid,closest_pos)
 	tilemap.clear()
 	draw_grid_to_tilemap()
@@ -114,7 +115,7 @@ func carve_horizontal_tunnel(
 			y = clamp(y, 1, map_height - 2)
 	return path
 
-func roughen_tunnel_floor_with_moore(grid, seed := 98765, chance := 0.4):
+func roughen_tunnel_floor_with_moore(grid, seed := 98765):
 	var rng = RandomNumberGenerator.new()
 	rng.seed = seed
 
@@ -128,10 +129,10 @@ func roughen_tunnel_floor_with_moore(grid, seed := 98765, chance := 0.4):
 				for dy in range(-1, 2):
 					for dx in range(-1, 2):
 						var nx = clamp(x + dx, 0, map_width - 1)
-						var ny = clamp(y+1 + dy, 0, map_height - 1)
-						if grid[ny][nx] == 0 and rng.randf() < chance:
+						var ny = clamp(y + dy, 0, map_height - 1)
+						if grid[ny][nx] == 0 :
 							count += 1  # erode solid tile
-				if count > 2:
+				if count > 4:
 					grid[y+1][x] = 0
 				break  # move to next column
 
@@ -186,36 +187,6 @@ func find_min_surface_tunnel_distance(grid) -> Vector2i:
 
 	return best_pos
 
-
-func carve_simple_random_walk(
-	grid,
-	start: Vector2i,
-	steps := 100,
-	main_direction := Vector2i(0, 1),  # default: downward
-	direction_bias := 0.8
-):
-	var pos = start
-	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
-
-	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
-
-	for i in range(steps):
-		if pos.x < 1 or pos.x >= map_width - 1 or pos.y < 1 or pos.y >= map_height - 1:
-			break
-
-		grid[pos.y][pos.x] = 0  # carve
-
-		var dir: Vector2i
-		if rng.randf() < direction_bias:
-			dir = main_direction
-		else:
-			dir = directions[rng.randi_range(0, directions.size() - 1)]
-
-		pos += dir
-		pos.x = clamp(pos.x, 1, map_width - 2)
-		pos.y = clamp(pos.y, 1, map_height - 2)
-		
 func draw_grid_to_tilemap():
 	for y in range(map_height):
 		for x in range(map_width):
@@ -228,41 +199,66 @@ func draw_grid_to_tilemap():
 func is_preexisting_air(grid, pos: Vector2i, visited: Dictionary) -> bool:
 	return grid[pos.y][pos.x] == 0 and not visited.has(pos)
 
-func carve_cave_entrance(grid, start: Vector2i, main_direction := Vector2i(0, 1), direction_bias := 0.8):
+func carve_cave_entrance(grid, start: Vector2i, tunnel_path: Array,direction_bias:=0.2):
 	var pos = start
-	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
-
 	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
-	var visited := {}
+	var main_direction := Vector2i(0, 1)
+	var tunnel_set := {}
+	var rng = RandomNumberGenerator.new()
+	for p in tunnel_path:
+		tunnel_set[str(p)] = true
+
+	var max_steps := 300
 	var steps := 0
-	var max_steps := 200
-	var surface_cutoff := 55  # don't climb above this
 
 	while steps < max_steps:
-		if is_preexisting_air(grid, pos, visited):
-			break  # reached tunnel
+		print(steps)
+		print(pos)
+		# Check if we've reached the tunnel
+		for y in range(-1, 2):
+			for x in range(-1, 2):
+				var check_pos = pos + Vector2i(x, y)
+				if tunnel_set.has(str(check_pos)):
+					return  # connected
 
-		if pos.y < surface_cutoff:
-			continue  # don't climb into surface
-
-		grid[pos.y][pos.x] = 0
-		visited[pos] = true
-		steps += 1
-
+		# Carve 3x3 area
+		for y in range(-1, 2):
+			for x in range(-2, 3):
+				var nx = pos.x + x
+				var ny = pos.y + y
+				if nx >= 0 and nx < map_width and ny >= 0 and ny < map_height:
+					grid[ny][nx] = 0
+		
 		var dir: Vector2i
 		if rng.randf() < direction_bias:
 			dir = main_direction
 		else:
 			dir = directions[rng.randi_range(0, directions.size() - 1)]
-
+		
+		
 		pos -= dir
 		pos.x = clamp(pos.x, 1, map_width - 2)
 		pos.y = clamp(pos.y, 1, map_height - 2)
-		print(pos)
+		steps += 1
 		
-func min_distance_at(x_value):
-	for y in range(map_height):
-		if map_grid[y][x_value] == 0 and map_grid[y+1][x_value] == 1:
-			print("tunnel ceiling at (",x_value,",",y,")")
-			tilemap.set_cell(Vector2i(x_value,y),0,Vector2i(7,0))
+func carve_simple_random_walk(grid,start: Vector2i,steps := 100):
+	var pos = start
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed
+
+	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+
+	for i in range(steps):
+		if pos.x < 1 or pos.x >= map_width - 1 or pos.y < 1 or pos.y >= map_height - 1:
+			break
+
+		for y in range(-1,2,1):
+			for x in range(-1,2,1):
+				grid[pos.y+y][pos.x+x] = 0
+
+		var dir: Vector2i
+		dir = directions[rng.randi_range(0, directions.size() - 1)]
+
+		pos += dir
+		pos.x = clamp(pos.x, 1, map_width - 2)
+		pos.y = clamp(pos.y, 1, map_height - 2)
