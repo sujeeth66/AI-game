@@ -16,6 +16,8 @@
 
 ## Day-3(OCT 1,2025):  
 &emsp;&emsp;&emsp;10:02-start  
-&emsp;&emsp;&emsp;12:11-implemented tunnel entrance.moving on to tunnel room generation
-&emsp;&emsp;&emsp;
-&emsp;&emsp;&emsp;
+&emsp;&emsp;&emsp;12:11-implemented tunnel entrance.moving on to tunnel room generation  
+&emsp;&emsp;&emsp;03:03-implemented tunnel room generation along with a 2nd tunnel system.moving on to making the 2nd entrance  
+&emsp;&emsp;&emsp;05:33-implemented multi tunnel system with entrance generation.  
+&emsp;&emsp;&emsp;07:39- modularized map generation and trying to implement flood fill for loot assignment.  
+&emsp;&emsp;&emsp;08:02-end of day  
