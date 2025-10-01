@@ -3,7 +3,7 @@ extends Node2D
 @onready var tilemap := $TileMapLayer
 
 var map_width := 300
-var map_height := 100
+var map_height := 150
 var surface_height := 60  # top half is surface
 var seed := 12345
 var map_grid := []
@@ -15,7 +15,7 @@ var best_pos
 func _ready():
 	initialize_empty_grid()
 	generate_surface_layer()
-	var tunnel_path = carve_horizontal_tunnel(50,300,7)
+	var tunnel_path = carve_horizontal_tunnel(80,300,7)
 	
 	for i in range(2):
 		roughen_tunnel_floor_with_moore(map_grid)
@@ -23,13 +23,19 @@ func _ready():
 	var closest_pos = find_min_surface_tunnel_distance(map_grid)
 	print("Closest surface-tunnel column at x =", closest_pos)
 	carve_cave_entrance(map_grid, Vector2i(closest_pos.x,closest_pos.y ),tunnel_path)
-	var tunnel_path_2 = carve_horizontal_tunnel(20,300,10)
+	var tunnel_path_2 = carve_horizontal_tunnel(30,300,10)
+	var distant_x = find_distant_column(closest_pos.x, 80)
+	var tunnel11_y = get_tunnel_y_from_path(tunnel_path, distant_x, "floor")
+	carve_cave_entrance(map_grid, Vector2i(distant_x, tunnel11_y),tunnel_path_2)
+
 	generate_tunnel_rooms(map_grid,tunnel_path)
-	#carve_simple_random_walk(map_grid, Vector2i(168,59))
-		#carve_simple_random_walk(map_grid,closest_pos)
+	generate_tunnel_rooms(map_grid,tunnel_path_2)
 	tilemap.clear()
 	draw_grid_to_tilemap()
-	#tilemap.set_cell(grid_to_vector2i(closest_pos.y,closest_pos.x),0,Vector2i(7,0))
+	for x in range(-1,2):
+		for y in range(-1,2):
+			tilemap.set_cell(Vector2i(distant_x+x,150-tunnel11_y+y),0,Vector2i(0,4))
+	
 	
 func grid_to_vector2i(y,x):
 	var vector_coords : Vector2i = Vector2i(x,map_height - y)
@@ -60,11 +66,11 @@ func initialize_empty_grid():
 	map_grid.clear()
 	for y in range(map_height):
 		var row := []
-		if y >= 66:
+		if y >= 86:
 			for x in range(map_width):
 				row.append(0)  
 			map_grid.append(row)
-		elif y < 66:
+		elif y < 86:
 			for x in range(map_width):
 				row.append(1)  
 			map_grid.append(row)
@@ -84,7 +90,7 @@ func generate_surface_layer(smoothness := 80.0, cutoff := 0):
 			#print("surface_y = ",surface_y," map_height = " ,map_height)
 		for y in range(surface_y):
 			if y > cutoff:
-				map_grid[y+55][x] = 1  # fill solid below surface
+				map_grid[y+85][x] = 1  # fill solid below surface
 
 
 func carve_horizontal_tunnel(
@@ -195,9 +201,11 @@ func draw_grid_to_tilemap():
 		for x in range(map_width):
 			var cell_pos = Vector2i(x, map_height - y - 1)
 			if map_grid[y][x] == 1:
-				tilemap.set_cell(cell_pos, 0, Vector2i(0, 0))  # solid
-			elif map_grid[y][x] == 2:
-				tilemap.set_cell(cell_pos, 0, Vector2i(1, 0))  # air (optional debug tile)
+				tilemap.set_cell(cell_pos, 0, Vector2i(0, 1))  # solid
+			#elif map_grid[y][x] == 2:#tunnel rooms
+				#tilemap.set_cell(cell_pos, 0, Vector2i(7, 0))  
+			elif map_grid[y][x] == 3:#tunnel 2 entrance
+				tilemap.set_cell(cell_pos, 0, Vector2i(8, 0))
 
 func is_preexisting_air(grid, pos: Vector2i, visited: Dictionary) -> bool:
 	return grid[pos.y][pos.x] == 0 and not visited.has(pos)
@@ -230,7 +238,7 @@ func carve_cave_entrance(grid, start: Vector2i, tunnel_path: Array,direction_bia
 				var nx = pos.x + x
 				var ny = pos.y + y
 				if nx >= 0 and nx < map_width and ny >= 0 and ny < map_height:
-					grid[ny][nx] = 0
+					grid[ny][nx] = 3
 		
 		var dir: Vector2i
 		if rng.randf() < direction_bias:
@@ -244,61 +252,174 @@ func carve_cave_entrance(grid, start: Vector2i, tunnel_path: Array,direction_bia
 		pos.y = clamp(pos.y, 1, map_height - 2)
 		steps += 1
 		
-func carve_simple_random_walk(grid,start: Vector2i,steps := 100,direction : Vector2i = Vector2i(1,0) , direction_bias := 0.25):
+func carve_simple_random_walk(grid, start: Vector2i, steps := 100, direction := Vector2i(1, 0), direction_bias := 0.25):
 	var pos = start
 	var rng = RandomNumberGenerator.new()
-	rng.randomize()  # uses internal entropy
+	rng.randomize()
 
-	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+	var base_directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
 
 	for i in range(steps):
+		#print(steps)
 		if pos.x < 5 or pos.x >= map_width - 5 or pos.y < 1 or pos.y >= map_height - 1:
 			break
 
-		for y in range(-2,3,1):
-			for x in range(-1,2,1):
-				grid[pos.y+y][pos.x+x] = 2
+		# Carve 3x3 area
+		for y in range(-2, 3):
+			for x in range(-1, 2):
+				grid[pos.y + y][pos.x + x] = 2
 
+		# Prune unsafe directions
+		var safe_directions := []
+		for dir in base_directions:
+			var check_pos = pos + dir
+			var safe := true
+			for offset in range(1, 6):
+				var probe = check_pos + dir * offset
+				if probe.x < 0 or probe.x >= map_width or probe.y < 0 or probe.y >= map_height:
+					safe = false
+					break
+				if grid[probe.y][probe.x] == 0:
+					safe = false
+					break
+			if safe:
+				safe_directions.append(dir)
+
+		# Choose direction
 		var dir: Vector2i
-		if rng.randf() < direction_bias:
+		if rng.randf() < direction_bias and safe_directions.has(direction):
 			dir = direction
+		elif safe_directions.size() > 0:
+			dir = safe_directions[rng.randi_range(0, safe_directions.size() - 1)]
 		else:
-			dir = directions[rng.randi_range(0, directions.size() - 1)]
+			break  # no safe directions left
 
-		pos -= dir
+		pos += dir
 		pos.x = clamp(pos.x, 1, map_width - 2)
 		pos.y = clamp(pos.y, 1, map_height - 2)
 
 func generate_tunnel_rooms(grid, tunnel_path: Array):
-	
 	var roof_starts := []
 	var floor_starts := []
+
 	for p in tunnel_path:
-		if p.x > 0 and map_grid[p.y][p.x - 1] == 1 :
-			if map_grid[p.y-1][p.x-1] == 0 :
+		if p.x > 0 and map_grid[p.y][p.x - 1] == 1:
+			if map_grid[p.y - 1][p.x - 1] == 0:
 				roof_starts.append(p)
-			if map_grid[p.y+1][p.x-1] == 0 :
+			if map_grid[p.y + 1][p.x - 1] == 0:
 				floor_starts.append(p)
 		elif p.x < map_width - 1 and map_grid[p.y][p.x + 1] == 1:
-			if map_grid[p.y-1][p.x+1] == 0 :
+			if map_grid[p.y - 1][p.x + 1] == 0:
 				roof_starts.append(p)
-			if map_grid[p.y+1][p.x+1] == 0 :
+			if map_grid[p.y + 1][p.x + 1] == 0:
 				floor_starts.append(p)
-			
+
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.seed = seed + 42  # offset to avoid overlap
+
+	roof_starts.shuffle()
+	floor_starts.shuffle()
+
 	for i in range(0, roof_starts.size(), 10):
-		if rng.randf() < 1:
-			print(roof_starts[i])
-			if rng.randf() < 0.5:
-				carve_simple_random_walk(map_grid, roof_starts[i], 50,Vector2i(-1,-1))
-			else:
-				carve_simple_random_walk(map_grid, roof_starts[i], 80,Vector2i(1,-1))
-	
+		if i < roof_starts.size():
+			var start = roof_starts[i]
+			var dir = Vector2i(-1, -1) if rng.randf() < 0.5 else Vector2i(1, -1)
+			carve_simple_random_walk(map_grid, start, 150, dir)
+
 	for i in range(0, floor_starts.size(), 10):
-		if rng.randf() < 1:
-			print(floor_starts[i])
-			if rng.randf() < 0.5:
-				carve_simple_random_walk(map_grid, floor_starts[i], 80,Vector2i(-1,1))
-			else:
-				carve_simple_random_walk(map_grid, floor_starts[i], 80,Vector2i(1,1))
+		if i < floor_starts.size():
+			var start = floor_starts[i]
+			var dir = Vector2i(-1, 1) if rng.randf() < 0.5 else Vector2i(1, 1)
+			carve_simple_random_walk(map_grid, start, 150, dir)
+			
+func find_distant_column(reference_x: int, min_distance := 150) -> int:
+	var candidates := []
+	for x in range(10, map_width - 10):
+		if abs(x - reference_x) >= min_distance:
+			candidates.append(x)
+	if candidates.size() == 0:
+		return -1
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed + 999
+	return candidates[rng.randi_range(0, candidates.size() - 1)]
+	
+func carve_tunnel_2_entrance(grid, x: int, y_start: int, target_tunnel: Array = []):
+	var pos = Vector2i(x, y_start)
+	var max_steps = 100
+	var steps = 0
+	var rng = RandomNumberGenerator.new()
+	var direction_bias = 0.4
+	var direction = Vector2i(0, 1)  # always prefer downward
+	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
+
+	var tunnel_set := {}
+	for p in target_tunnel:
+		tunnel_set[str(p)] = true
+
+	while steps < max_steps:
+		print(steps)
+		# Carve 3x3 area
+		for y in range(-1, 2):
+			for dx in range(-2, 3):
+				var nx = pos.x + dx
+				var ny = pos.y + y
+				if nx >= 0 and nx < map_width and ny >= 0 and ny < map_height:
+					grid[ny][nx] = 3
+
+		# Check for connection to target tunnel
+		for y in range(-1, 2):
+			for dx in range(-1, 2):
+				var check_pos = pos + Vector2i(dx, y)
+				if tunnel_set.has(str(check_pos)):
+					return  # connected
+
+		# Prefer downward if safe
+		var dir: Vector2i
+		if rng.randf() < direction_bias and directions.has(direction):
+			dir = direction
+		elif directions.size() > 0:
+			dir = directions[rng.randi_range(0, directions.size() - 1)]
+		else:
+			break  # no safe directions left
+
+		pos -= dir
+		pos.x = clamp(pos.x, 1, map_width - 2)
+		pos.y = clamp(pos.y, 1, map_height - 2)
+		steps += 1
+		
+func find_tunnel_roof_and_floor_at_x(grid, x: int) -> int:
+	var tunnel1_y := -1
+	var tunnel2_y := -1
+
+	for y in range(10, map_height - 10):
+		# Tunnel 2 roof: solid above, air below
+		if tunnel2_y == -1 and grid[y - 1][x] == 0 and grid[y + 1][x] == 1:
+			tunnel2_y = y
+	
+	for y in range(10, map_height - 10):
+		if y > tunnel2_y:
+		# Tunnel 1 floor: air above, solid below
+			if tunnel1_y == -1 and grid[y - 1][x] == 1 and grid[y + 1][x] == 0:
+				tunnel1_y = y
+
+		# Early exit if both found
+		if tunnel1_y != -1 and tunnel2_y != -1:
+			break
+
+	return tunnel1_y
+
+func get_tunnel_y_from_path(tunnel_path: Array, x: int, mode := "floor") -> int:
+	var candidates := []
+	for p in tunnel_path:
+		if p.x == x:
+			candidates.append(p.y)
+
+	if candidates.size() == 0:
+		return -1  # no match at this x
+
+	if mode == "floor":
+		return candidates.min()
+	elif mode == "roof":
+		return candidates.max()
+	else:
+		return -1
