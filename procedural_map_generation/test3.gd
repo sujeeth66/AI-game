@@ -15,13 +15,16 @@ var best_pos
 func _ready():
 	initialize_empty_grid()
 	generate_surface_layer()
-	var tunnel_path = carve_horizontal_tunnel()
+	var tunnel_path = carve_horizontal_tunnel(50,300,7)
+	
 	for i in range(2):
 		roughen_tunnel_floor_with_moore(map_grid)
 	smooth_tunnel(map_grid)
 	var closest_pos = find_min_surface_tunnel_distance(map_grid)
 	print("Closest surface-tunnel column at x =", closest_pos)
-	carve_cave_entrance(map_grid, Vector2i(closest_pos.x,closest_pos.y - 1),tunnel_path)
+	carve_cave_entrance(map_grid, Vector2i(closest_pos.x,closest_pos.y ),tunnel_path)
+	var tunnel_path_2 = carve_horizontal_tunnel(20,300,10)
+	generate_tunnel_rooms(map_grid,tunnel_path)
 	#carve_simple_random_walk(map_grid, Vector2i(168,59))
 		#carve_simple_random_walk(map_grid,closest_pos)
 	tilemap.clear()
@@ -86,7 +89,7 @@ func generate_surface_layer(smoothness := 80.0, cutoff := 0):
 
 func carve_horizontal_tunnel(
 	start_y :=40,
-	length := 200,
+	length := 300,
 	tunnel_width := 16,
 	roughness := 0.2,
 	curvyness := 0.3,
@@ -193,8 +196,8 @@ func draw_grid_to_tilemap():
 			var cell_pos = Vector2i(x, map_height - y - 1)
 			if map_grid[y][x] == 1:
 				tilemap.set_cell(cell_pos, 0, Vector2i(0, 0))  # solid
-			#else:
-				#tilemap.set_cell(cell_pos, 0, Vector2i(1, 0))  # air (optional debug tile)
+			elif map_grid[y][x] == 2:
+				tilemap.set_cell(cell_pos, 0, Vector2i(1, 0))  # air (optional debug tile)
 
 func is_preexisting_air(grid, pos: Vector2i, visited: Dictionary) -> bool:
 	return grid[pos.y][pos.x] == 0 and not visited.has(pos)
@@ -212,8 +215,8 @@ func carve_cave_entrance(grid, start: Vector2i, tunnel_path: Array,direction_bia
 	var steps := 0
 
 	while steps < max_steps:
-		print(steps)
-		print(pos)
+		#print(steps)
+		#print(pos)
 		# Check if we've reached the tunnel
 		for y in range(-1, 2):
 			for x in range(-1, 2):
@@ -241,24 +244,61 @@ func carve_cave_entrance(grid, start: Vector2i, tunnel_path: Array,direction_bia
 		pos.y = clamp(pos.y, 1, map_height - 2)
 		steps += 1
 		
-func carve_simple_random_walk(grid,start: Vector2i,steps := 100):
+func carve_simple_random_walk(grid,start: Vector2i,steps := 100,direction : Vector2i = Vector2i(1,0) , direction_bias := 0.25):
 	var pos = start
 	var rng = RandomNumberGenerator.new()
-	rng.seed = seed
+	rng.randomize()  # uses internal entropy
 
 	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
 
 	for i in range(steps):
-		if pos.x < 1 or pos.x >= map_width - 1 or pos.y < 1 or pos.y >= map_height - 1:
+		if pos.x < 5 or pos.x >= map_width - 5 or pos.y < 1 or pos.y >= map_height - 1:
 			break
 
-		for y in range(-1,2,1):
+		for y in range(-2,3,1):
 			for x in range(-1,2,1):
-				grid[pos.y+y][pos.x+x] = 0
+				grid[pos.y+y][pos.x+x] = 2
 
 		var dir: Vector2i
-		dir = directions[rng.randi_range(0, directions.size() - 1)]
+		if rng.randf() < direction_bias:
+			dir = direction
+		else:
+			dir = directions[rng.randi_range(0, directions.size() - 1)]
 
-		pos += dir
+		pos -= dir
 		pos.x = clamp(pos.x, 1, map_width - 2)
 		pos.y = clamp(pos.y, 1, map_height - 2)
+
+func generate_tunnel_rooms(grid, tunnel_path: Array):
+	
+	var roof_starts := []
+	var floor_starts := []
+	for p in tunnel_path:
+		if p.x > 0 and map_grid[p.y][p.x - 1] == 1 :
+			if map_grid[p.y-1][p.x-1] == 0 :
+				roof_starts.append(p)
+			if map_grid[p.y+1][p.x-1] == 0 :
+				floor_starts.append(p)
+		elif p.x < map_width - 1 and map_grid[p.y][p.x + 1] == 1:
+			if map_grid[p.y-1][p.x+1] == 0 :
+				roof_starts.append(p)
+			if map_grid[p.y+1][p.x+1] == 0 :
+				floor_starts.append(p)
+			
+	var rng = RandomNumberGenerator.new()
+	rng.seed = seed
+	for i in range(0, roof_starts.size(), 10):
+		if rng.randf() < 1:
+			print(roof_starts[i])
+			if rng.randf() < 0.5:
+				carve_simple_random_walk(map_grid, roof_starts[i], 50,Vector2i(-1,-1))
+			else:
+				carve_simple_random_walk(map_grid, roof_starts[i], 80,Vector2i(1,-1))
+	
+	for i in range(0, floor_starts.size(), 10):
+		if rng.randf() < 1:
+			print(floor_starts[i])
+			if rng.randf() < 0.5:
+				carve_simple_random_walk(map_grid, floor_starts[i], 80,Vector2i(-1,1))
+			else:
+				carve_simple_random_walk(map_grid, floor_starts[i], 80,Vector2i(1,1))
