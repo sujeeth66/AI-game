@@ -21,3 +21,6 @@
 &emsp;&emsp;&emsp;05:33-implemented multi tunnel system with entrance generation.  
 &emsp;&emsp;&emsp;07:39- modularized map generation and trying to implement flood fill for loot assignment.  
 &emsp;&emsp;&emsp;08:02-end of day  
+
+##Day-4(OCT 2,2025):  
+&emsp;&emsp;&emsp;06:56-no work done due to festival
