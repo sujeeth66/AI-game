@@ -22,5 +22,12 @@
 &emsp;&emsp;&emsp;07:39- modularized map generation and trying to implement flood fill for loot assignment.  
 &emsp;&emsp;&emsp;08:02-end of day  
 
-##Day-4(OCT 2,2025):  
+## Day-4(OCT 2,2025):  
 &emsp;&emsp;&emsp;06:56-no work done due to festival
+
+## Day-5(OCT 3,2025):  
+&emsp;&emsp;&emsp;09:56-start
+&emsp;&emsp;&emsp;11:28-retrying to implement flood fill for loot assignment
+&emsp;&emsp;&emsp;02:23-retrying to implement flood fill for loot assignment
+&emsp;&emsp;&emsp;05:21-successfully implemented flood fill for loot assignment
+&emsp;&emsp;&emsp;06:02-end of day
