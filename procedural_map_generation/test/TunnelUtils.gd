@@ -1,3 +1,4 @@
+
 static func get_tunnel_y_from_path(tunnel_path: Array, x: int, mode := "floor") -> int:
 	var candidates := []
 	for p in tunnel_path:

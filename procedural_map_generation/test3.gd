@@ -20,7 +20,7 @@ var next_room_id := 0
 
 func _ready():
 	initialize_empty_grid(map_grid, map_width, map_height)
-	generate_surface_layer(map_grid, map_width, map_height, surface_height, seed)
+	generate_surface_layer(map_grid, map_width, map_height, surface_height, seed,"mountains")
 	var tunnel_path = carve_horizontal_tunnel(map_grid, 80, 300, 7, seed)
 	
 	for i in range(2):
@@ -34,19 +34,24 @@ func _ready():
 	var tunnel11_y = get_tunnel_y_from_path(tunnel_path, distant_x, "floor")
 	carve_cave_entrance(map_grid, Vector2i(distant_x, tunnel11_y),tunnel_path_2,map_width,map_height)
 
-	var room_starts_1 = generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
-	var room_starts_2 = generate_tunnel_rooms(map_grid, tunnel_path_2, map_width, map_height, seed)
-	var all_room_starts = room_starts_1 + room_starts_2
+	var room_tiles_1 = generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
+	var room_tiles_2 = generate_tunnel_rooms(map_grid, tunnel_path_2, map_width, map_height, seed)
+	var all_room_tiles := {}
+	for key in room_tiles_1.keys():
+		all_room_tiles[key] = room_tiles_1[key]
+	for key in room_tiles_2.keys():
+		all_room_tiles[key + room_tiles_1.size()] = room_tiles_2[key]
 	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
 	enclose_grid(map_grid, map_width, map_height)
-	analyze_and_decorate_rooms(map_grid, all_room_starts, spawn_pos)
-	
+	analyze_and_decorate_rooms(map_grid, all_room_tiles,Vector2i(spawn_pos.x,map_height - spawn_pos.y))
+	print("Start tile value:", map_grid[spawn_pos.y][spawn_pos.x])
 	tilemap.clear()
 	draw_grid_to_tilemap()
 	for x in range(-1,2):
 		for y in range(-1,2):
 			tilemap.set_cell(spawn_pos,0,Vector2i(0,4))
-	await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
+	print("Start tile value:", map_grid[spawn_pos.y][spawn_pos.x])
+	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
 
 func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: Vector2i) -> void:
 	var queue := [start]
@@ -87,7 +92,7 @@ func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: V
 	sorted_keys.sort()
 	for dist in sorted_keys:
 		for pos in bands[dist]:
-			tilemap.set_cell(Vector2i(pos.x,map_height - pos.y - 1), 0, Vector2i(5, 4))  # Debug tile
+			tilemap.set_cell(Vector2i(pos.x, map_height - pos.y - 1), 0, Vector2i(5, 4))
 		await get_tree().process_frame  # One band per frame
 
 
@@ -124,20 +129,44 @@ func initialize_empty_grid(grid: Array, width: int, height: int):
 			row.append(0 if y >= 86 else 1)
 		grid.append(row)
 
-func generate_surface_layer(grid: Array, width: int, height: int, surface_height: int, seed: int, smoothness := 80.0, cutoff := 0):
+func generate_surface_layer(grid: Array, width: int, height: int, surface_height: int, seed: int, terrain_type := "plain", cutoff := 0):
 	var noise = FastNoiseLite.new()
 	noise.seed = seed
-	noise.frequency = 2.5 / smoothness
-	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+
+	match terrain_type:
+		"plain":
+			noise.noise_type = FastNoiseLite.TYPE_PERLIN
+			noise.frequency = 0.01
+		"hilly":
+			noise.noise_type = FastNoiseLite.TYPE_PERLIN
+			noise.frequency = 0.03
+		"dunes":
+			noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+			noise.frequency = 0.08
+		"peaks":
+			noise.noise_type = FastNoiseLite.TYPE_PERLIN
+			noise.frequency = 0.05
+			# simulate ridges
+			# later: normalized = abs(raw)
+		"mountains":
+			noise.noise_type = FastNoiseLite.TYPE_SIMPLEX
+			noise.frequency = 0.04
 
 	for x in range(width):
 		var raw = noise.get_noise_2d(x, 0)
 		var normalized = clamp((raw * 0.5 + 0.5), 0.0, 1.0)
+
+		# Optional shaping
+		if terrain_type == "plain":
+			normalized = pow(normalized, 1.5)  # flatten
+		elif terrain_type == "peaks":
+			normalized = pow(normalized, 0.5)  # exaggerate
+
 		var surface_y = int(normalized * surface_height)
 		for y in range(surface_y):
 			if y > cutoff:
 				grid[y + 85][x] = 1
-
+				
 func enclose_grid(grid: Array, map_width: int, map_height: int):
 	for x in range(map_width):
 		grid[0][x] = 1  # top border
@@ -313,14 +342,13 @@ func carve_cave_entrance(grid: Array, start: Vector2i, tunnel_path: Array, width
 		pos.y = clamp(pos.y, 1, height - 2)
 		steps += 1
 
-func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100, direction := Vector2i(1, 0), direction_bias := 0.25):
+func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100, direction := Vector2i(1, 0), direction_bias := 0.25) -> Array:
 	var pos = start
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
 	var base_directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
-	
-	# Track all carved positions for this room
-	var carved_positions = []
+
+	var carved_positions: Array = []
 
 	for i in range(steps):
 		if pos.x < 5 or pos.x >= grid[0].size() - 5 or pos.y < 1 or pos.y >= grid.size() - 1:
@@ -330,7 +358,6 @@ func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100, direct
 			for x in range(-1, 2):
 				var carve_pos = Vector2i(pos.x + x, pos.y + y)
 				grid[carve_pos.y][carve_pos.x] = 2
-				# Add to carved positions if not already present
 				if not carved_positions.has(carve_pos):
 					carved_positions.append(carve_pos)
 
@@ -357,10 +384,13 @@ func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100, direct
 		pos.x = clamp(pos.x, 1, grid[0].size() - 2)
 		pos.y = clamp(pos.y, 1, grid.size() - 2)
 
-func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, height: int, seed: int):
+	return carved_positions
+	
+func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, height: int, seed: int) -> Dictionary:
 	var roof_starts := []
 	var floor_starts := []
 	var room_starts := []
+	var room_tiles := {}  # Dictionary to hold room_number: [Vector2i, ...]
 
 	for p in tunnel_path:
 		if p.x > 0 and grid[p.y][p.x - 1] == 1:
@@ -380,21 +410,28 @@ func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, height: 
 	roof_starts.shuffle()
 	floor_starts.shuffle()
 
+	var room_index := 0
+
 	for i in range(0, roof_starts.size(), 10):
 		if i < roof_starts.size():
 			var start = roof_starts[i]
 			var dir = Vector2i(-1, -1) if rng.randf() < 0.5 else Vector2i(1, -1)
-			room_starts.append(start)  # where each room starts
-			carve_simple_random_walk(grid, start, 150, dir)
+			room_starts.append(start)
+			var carved = carve_simple_random_walk(grid, start, 150, dir)
+			room_tiles[room_index] = carved
+			room_index += 1
 
 	for i in range(0, floor_starts.size(), 10):
 		if i < floor_starts.size():
 			var start = floor_starts[i]
 			var dir = Vector2i(-1, 1) if rng.randf() < 0.5 else Vector2i(1, 1)
-			room_starts.append(start)  # where each room starts
-			carve_simple_random_walk(grid, start, 150, dir)
-	return room_starts
+			room_starts.append(start)
+			var carved = carve_simple_random_walk(grid, start, 150, dir)
+			room_tiles[room_index] = carved
+			room_index += 1
 
+	return room_tiles
+	
 func find_valid_spawn(grid: Array, x: int, map_height: int) -> Vector2i:
 	for y in range(map_height):
 		if grid[y][x] == 0 or grid[y][x] == 2:
@@ -471,83 +508,58 @@ func loot_tile_for(tier: String) -> int:
 		"epic": return 6
 		_: return 2
 
-func analyze_and_decorate_rooms(grid: Array, room_starts: Array, player_spawn: Vector2i):
-	# First, get the distance map from player spawn
+func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, player_spawn: Vector2i):
 	var result = flood_fill_distance(grid, player_spawn)
 	var distance_map = result["map"]
 	var max_dist = result["max"] - 70
 
-	# Track processed tiles to avoid revisiting
-	var processed := {}
-	var room_id = 0
-	
-	# Clear existing rooms
 	rooms.clear()
-	
-	# Process each potential room start
-	for start in room_starts:
-		# Skip if we've already processed this position
-		if processed.has(start):
+	var room_data := []
+
+	for room_id in room_tiles.keys():
+		var region = room_tiles[room_id]
+		if region.size() <= 20:
+			print("Skipped empty room:", room_id)
 			continue
-			
-		# Get all connected tiles in this room
-		var queue = [start]
-		var region = []
+
+		var center = get_room_center(region)
 		var closest_dist = INF
-		var room_has_path = false
-		
-		while queue.size() > 0:
-			var pos = queue.pop_front()
-			
-			# Skip if out of bounds or not a room tile
-			if pos.x < 0 or pos.x >= grid[0].size() or pos.y < 0 or pos.y >= grid.size():
-				continue
-			if grid[pos.y][pos.x] != 2 or processed.has(pos):
-				continue
-			
-			# Mark as processed
-			processed[pos] = true
-			region.append(pos)
-			
-			# Check distance from spawn
-			var grid_pos = Vector2i(pos.x, 150 - pos.y)
+		var closest_point = null
+
+		for pos in region:
+			var grid_pos = pos  # adjust if needed
 			if distance_map.has(grid_pos):
-				room_has_path = true
 				var dist = distance_map[grid_pos]
 				if dist < closest_dist:
 					closest_dist = dist
-			
-			# Add neighbors to queue
-			for dir in [Vector2i(0,1), Vector2i(0,-1), Vector2i(1,0), Vector2i(-1,0)]:
-				queue.append(pos + dir)
-		
-		# Skip if room is too small or has no path
-		if region.size() < 20 or not room_has_path:
-			if region.size() >= 5:
-				print("Skipping room at ", start, " - no path found")
+					closest_point = grid_pos
+
+		if closest_point == null:
+			print("No path to room", room_id)
 			continue
-		
-		# Determine room tier based on distance
+
 		var tier := "common"
-		if closest_dist > max_dist * 0.66:
+		if closest_dist > max_dist * 0.86:
 			tier = "epic"
-		elif closest_dist > max_dist * 0.33:
+		elif closest_dist > max_dist * 0.53:
 			tier = "rare"
-		
-		# Store room data
-		rooms[room_id] = {
-			"coords": region.duplicate(),
+
+		room_data.append({
+			"id": room_id,
+			"coords": region,
+			"center": center,
 			"tier": tier,
-			"center": get_room_center(region),
 			"distance": closest_dist
-		}
-		
-		print("Room ", room_id, " at ", start, " (size: ", region.size(), 
-			" tiles, distance: ", closest_dist, ", tier: ", tier, ")")
-		
-		# Update grid with tiered tiles
-		var tile_value = loot_tile_for(tier)
-		for pos in region:
+		})
+
+		print("Room", room_id, "center:", center, "distance:", closest_dist, "tier:", tier)
+
+	# Sort rooms by distance
+	room_data.sort_custom(func(a, b): return a["distance"] < b["distance"])
+
+	# Decorate in order
+	for room in room_data:
+		var tile_value = loot_tile_for(room["tier"])
+		for pos in room["coords"]:
 			grid[pos.y][pos.x] = tile_value
-		
-		room_id += 1
+		rooms[room["id"]] = room.duplicate()

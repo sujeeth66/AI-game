@@ -12,6 +12,9 @@ var tunnel_top = -1
 var min_distance = 100
 var best_pos
 
+var rooms := {}
+var next_room_id := 0
+
 
 const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
 const TunnelGen = preload("res://procedural_map_generation/test/TunnelGen.gd")
@@ -41,23 +44,20 @@ func _ready():
 
 	TunnelConnector.carve_cave_entrance(map_grid, Vector2i(distant_x, tunnel11_y), tunnel_path_2, map_width, map_height)
 	
-	var room_starts_1 = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
-	var room_starts_2 = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path_2, map_width, map_height, seed)
-
-	var all_room_starts = room_starts_1 + room_starts_2
+	var room_tiles_1 = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
+	var room_tiles_2 = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path_2, map_width, map_height, seed)
+	
+	var all_room_tiles := {}
+	for key in room_tiles_1.keys():
+		all_room_tiles[key] = room_tiles_1[key]
+	for key in room_tiles_2.keys():
+		all_room_tiles[key + room_tiles_1.size()] = room_tiles_2[key]
+	
 	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
-	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_starts, spawn_pos)
-	
+	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
 	
 	tilemap.clear()
-	# In main.gd, before the final draw call
-	print("Final grid values (sample of first 10x10):")
-	for y in range(70):
-		var row = []
-		for x in range(70):
-			row.append(str(map_grid[y][x]))
-		print("  " + " ".join(row))
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
 
@@ -71,7 +71,7 @@ static func find_valid_spawn(grid: Array, x: int, map_height: int) -> Vector2i:
 			return Vector2i(x, y)
 	return Vector2i(x, 0)  # fallback
 
-func get_player_pos():
+static func get_player_pos():
 	print("player_spawn:-----------------------------------",Vector2i(Global.player_position))
 
 func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: Vector2i) -> void:
@@ -113,5 +113,5 @@ func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: V
 	sorted_keys.sort()
 	for dist in sorted_keys:
 		for pos in bands[dist]:
-			tilemap.set_cell(Vector2i(pos.x,map_height - pos.y), 0, Vector2i(5, 4))  # Debug tile
+			tilemap.set_cell(Vector2i(pos.x, map_height - pos.y - 1), 0, Vector2i(5, 4))
 		await get_tree().process_frame  # One band per frame

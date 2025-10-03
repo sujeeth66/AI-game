@@ -1,3 +1,4 @@
+
 static func carve_horizontal_tunnel(grid: Array, start_y: int, length: int, tunnel_width: int, seed: int, roughness := 0.2, curvyness := 0.3, max_shift := 2) -> Array:
 	var y = start_y
 	var width = tunnel_width

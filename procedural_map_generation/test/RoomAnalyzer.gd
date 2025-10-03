@@ -1,3 +1,4 @@
+
 static func flood_fill_region(grid: Array, start: Vector2i) -> Array:
 	var visited := {}
 	var region := []
@@ -68,23 +69,26 @@ static func loot_tile_for(tier: String) -> int:
 		"epic": return 6
 		_: return 2
 
-static func analyze_and_decorate_rooms(grid: Array, room_starts: Array, player_spawn: Vector2i):
+static func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, player_spawn: Vector2i ,rooms,next_room_id):
 	var result = flood_fill_distance(grid, player_spawn)
 	var distance_map = result["map"]
 	var max_dist = result["max"] - 70
 
-	for start in room_starts:
-		var region = flood_fill_region(grid, start)
-		if region.size() < 0:
-			print("Skipped tiny room at:", start, "size:", region.size())
+	rooms.clear()
+	var room_data := []
+
+	for room_id in room_tiles.keys():
+		var region = room_tiles[room_id]
+		if region.size() <= 20:
+			print("Skipped empty room:", room_id)
 			continue
 
-		# Find the closest point in the room to the player spawn
+		var center = get_room_center(region)
 		var closest_dist = INF
 		var closest_point = null
-		
+
 		for pos in region:
-			var grid_pos = Vector2i(pos.x, 150 - pos.y)
+			var grid_pos = pos  # adjust if needed
 			if distance_map.has(grid_pos):
 				var dist = distance_map[grid_pos]
 				if dist < closest_dist:
@@ -92,19 +96,31 @@ static func analyze_and_decorate_rooms(grid: Array, room_starts: Array, player_s
 					closest_point = grid_pos
 
 		if closest_point == null:
-			print("No path to room at", start)
+			print("No path to room", room_id)
 			continue
 
 		var tier := "common"
-		if closest_dist > max_dist * 0.66:
+		if closest_dist > max_dist * 0.96:
 			tier = "epic"
-		elif closest_dist > max_dist * 0.33:
+		elif closest_dist > max_dist * 0.53:
 			tier = "rare"
-		
-		print("Room at", start, "size:", region.size(), "closest point:", closest_point, "distance:", closest_dist, "tier:", tier)
 
-		# In RoomAnalyzer.gd, after assigning the tier
-		var tile_value = loot_tile_for(tier)
-		#print(f"Setting room at {start} to tier {tier} (tile value: {tile_value})")
-		for pos in region:
+		room_data.append({
+			"id": room_id,
+			"coords": region,
+			"center": center,
+			"tier": tier,
+			"distance": closest_dist
+		})
+
+		print("Room", room_id, "center:", center, "distance:", closest_dist, "tier:", tier)
+
+	# Sort rooms by distance
+	room_data.sort_custom(func(a, b): return a["distance"] < b["distance"])
+
+	# Decorate in order
+	for room in room_data:
+		var tile_value = loot_tile_for(room["tier"])
+		for pos in room["coords"]:
 			grid[pos.y][pos.x] = tile_value
+		rooms[room["id"]] = room.duplicate()

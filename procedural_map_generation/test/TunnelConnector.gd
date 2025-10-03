@@ -1,3 +1,4 @@
+
 static func carve_cave_entrance(grid: Array, start: Vector2i, tunnel_path: Array, width: int, height: int, direction_bias := 0.2):
 	var pos = start
 	var directions = [Vector2i(0, -1), Vector2i(0, 1), Vector2i(-1, 0), Vector2i(1, 0)]
