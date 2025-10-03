@@ -46,18 +46,24 @@ func _ready():
 
 	var all_room_starts = room_starts_1 + room_starts_2
 	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
-	print("spawn_pos:--------------------------------------------",spawn_pos)
-	call_deferred("get_player_pos")
-	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_starts, spawn_pos)
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
-
-	tilemap.clear()
-	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
+	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_starts, spawn_pos)
 	
+	
+	tilemap.clear()
+	# In main.gd, before the final draw call
+	print("Final grid values (sample of first 10x10):")
+	for y in range(70):
+		var row = []
+		for x in range(70):
+			row.append(str(map_grid[y][x]))
+		print("  " + " ".join(row))
+	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
+	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
+
 	for x in range(-3, 4):
 		for y in range(-3, 4):
-			tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(1, 15))
-			print("spawn_pos")
+			tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(0, 4))
 
 static func find_valid_spawn(grid: Array, x: int, map_height: int) -> Vector2i:
 	for y in range(map_height):
@@ -67,3 +73,45 @@ static func find_valid_spawn(grid: Array, x: int, map_height: int) -> Vector2i:
 
 func get_player_pos():
 	print("player_spawn:-----------------------------------",Vector2i(Global.player_position))
+
+func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: Vector2i) -> void:
+	var queue := [start]
+	var visited := {}
+	var distance := {}
+	visited[start] = true
+	distance[start] = 0
+	var max_dist := 0
+
+	while queue.size() > 0:
+		var current = queue.pop_front()
+		var dist = distance[current]
+		max_dist = max(max_dist, dist)
+
+		for dir in [Vector2i(0,1), Vector2i(0,-1), Vector2i(1,0), Vector2i(-1,0)]:
+			var next = current + dir
+			if next.x < 0 or next.x >= grid[0].size() or next.y < 0 or next.y >= grid.size():
+				continue
+			if visited.has(next):
+				continue
+			if grid[next.y][next.x] != 0 and grid[next.y][next.x] != 2 and grid[next.y][next.x] != 4 and grid[next.y][next.x] != 5 and grid[next.y][next.x] != 6:
+				continue
+
+			visited[next] = true
+			distance[next] = dist + 1
+			queue.append(next)
+
+	# Group positions by distance
+	var bands := {}
+	for pos in distance.keys():
+		var dist = distance[pos]
+		if not bands.has(dist):
+			bands[dist] = []
+		bands[dist].append(pos)
+
+	# Draw each band per frame
+	var sorted_keys := bands.keys()
+	sorted_keys.sort()
+	for dist in sorted_keys:
+		for pos in bands[dist]:
+			tilemap.set_cell(Vector2i(pos.x,map_height - pos.y), 0, Vector2i(5, 4))  # Debug tile
+		await get_tree().process_frame  # One band per frame

@@ -21,7 +21,7 @@ static func flood_fill_region(grid: Array, start: Vector2i) -> Array:
 			queue.append(next)
 
 	return region
-
+	
 static func get_room_center(region: Array) -> Vector2i:
 	var sum_x := 0
 	var sum_y := 0
@@ -75,24 +75,36 @@ static func analyze_and_decorate_rooms(grid: Array, room_starts: Array, player_s
 
 	for start in room_starts:
 		var region = flood_fill_region(grid, start)
-		if region.size() < 30:
+		if region.size() < 0:
 			print("Skipped tiny room at:", start, "size:", region.size())
 			continue
 
-		var center = get_room_center(region)
-		var center_dist = distance_map.get(center, 0)
+		# Find the closest point in the room to the player spawn
+		var closest_dist = INF
+		var closest_point = null
+		
+		for pos in region:
+			var grid_pos = Vector2i(pos.x, 150 - pos.y)
+			if distance_map.has(grid_pos):
+				var dist = distance_map[grid_pos]
+				if dist < closest_dist:
+					closest_dist = dist
+					closest_point = grid_pos
+
+		if closest_point == null:
+			print("No path to room at", start)
+			continue
 
 		var tier := "common"
-		if center_dist > max_dist * 0.66:
+		if closest_dist > max_dist * 0.66:
 			tier = "epic"
-		elif center_dist > max_dist * 0.33:
+		elif closest_dist > max_dist * 0.33:
 			tier = "rare"
+		
+		print("Room at", start, "size:", region.size(), "closest point:", closest_point, "distance:", closest_dist, "tier:", tier)
 
-		print("Room center:", center)
-		print("Region size:", region.size())
-		print("Center distance:", center_dist)
-		print("Tier:", tier)
-		print("---------------------")
-
+		# In RoomAnalyzer.gd, after assigning the tier
+		var tile_value = loot_tile_for(tier)
+		#print(f"Setting room at {start} to tier {tier} (tile value: {tile_value})")
 		for pos in region:
-			grid[pos.y][pos.x] = loot_tile_for(tier)
+			grid[pos.y][pos.x] = tile_value
