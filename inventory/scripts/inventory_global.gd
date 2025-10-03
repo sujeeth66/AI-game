@@ -10,10 +10,10 @@ signal inventory_updated
 
 var items = [
 	{"item_type":"quest_item" , "item_name":"raw_chicken" , "item_effect":"heal - 100" , "item_texture":preload("res://textures/raw_chicken.png")},
-	#{"item_type":"consumable" , "item_name":"apple" , "item_effect":"slot_boost - 1" , "item_texture":preload("res://textures/apple_icon.png")},
-	#{"item_type":"consumable" , "item_name":"cooked_chicken" , "item_effect":"heal - 100" , "item_texture":preload("res://textures/cooked_chicken.png")},
-	#{"item_type":"consumable" , "item_name":"raw_beef" , "item_effect":"heal - 150" , "item_texture":preload("res://textures/raw_meat.png")},
-	#{"item_type":"consumable" , "item_name":"steak" , "item_effect":"heal - 150" , "item_texture":preload("res://textures/cooked_steak.png")}
+	{"item_type":"consumable" , "item_name":"apple" , "item_effect":"slot_boost - 1" , "item_texture":preload("res://textures/apple_icon.png")},
+	{"item_type":"consumable" , "item_name":"cooked_chicken" , "item_effect":"heal - 100" , "item_texture":preload("res://textures/cooked_chicken.png")},
+	{"item_type":"consumable" , "item_name":"raw_beef" , "item_effect":"heal - 150" , "item_texture":preload("res://textures/raw_meat.png")},
+	{"item_type":"consumable" , "item_name":"steak" , "item_effect":"heal - 150" , "item_texture":preload("res://textures/cooked_steak.png")}
 ]
 
 var hotbar_size = 6

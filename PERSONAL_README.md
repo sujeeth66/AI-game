@@ -30,4 +30,5 @@
 &emsp;&emsp;&emsp;11:28-retrying to implement flood fill for loot assignment  
 &emsp;&emsp;&emsp;02:23-retrying to implement flood fill for loot assignment  
 &emsp;&emsp;&emsp;05:21-successfully implemented flood fill for loot assignment  
-&emsp;&emsp;&emsp;06:02-end of day  
+&emsp;&emsp;&emsp;06:34-trying to implement items spawn logic according to room tiers  
+&emsp;&emsp;&emsp;07:02-end of day  

@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var tilemap := $TileMapLayer
+@onready var items : Node2D = $Items
 
 var map_width := 300
 var map_height := 150
@@ -56,7 +57,8 @@ func _ready():
 	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
 	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
-	
+	spawn_items_in_rooms(rooms, 1)  # Spawns 3 items per room based on healing value
+
 	tilemap.clear()
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
@@ -113,5 +115,66 @@ func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: V
 	sorted_keys.sort()
 	for dist in sorted_keys:
 		for pos in bands[dist]:
-			tilemap.set_cell(Vector2i(pos.x, map_height - pos.y - 1), 0, Vector2i(5, 4))
+			tilemap.set_cell(Vector2i(pos.x, map_height - pos.y ), 0, Vector2i(5, 4))
 		await get_tree().process_frame  # One band per frame
+
+func get_heal_amount(effect: String) -> int:
+	if effect.begins_with("heal - "):
+		return int(effect.replace("heal - ", ""))
+	return 0
+
+func spawn_items_in_rooms(room_data: Dictionary, count_per_room := 2):
+	for room_id in room_data.keys():
+		var room = room_data[room_id]
+		var coords = room["coords"]
+		var distance = room["distance"]
+		var valid_cells := []
+
+		for pos in coords:
+			var x = pos.x
+			var y = pos.y
+
+			# Check if this is a solid tile with 3 air blocks above
+			if y >= 3 and map_grid[y][x] == 1:
+				if map_grid[y - 1][x] == 0 and map_grid[y - 2][x] == 0 and map_grid[y - 3][x] == 0:
+					var cell_pos = Vector2i(x, map_height - y - 1)
+					var world_pos = tilemap.map_to_local(cell_pos)
+					world_pos -= Vector2(-20, 20)
+					valid_cells.append(world_pos)
+
+		if valid_cells.size() == 0:
+			print("Room", room_id, "has no valid floor spawn cells")
+			continue
+
+		valid_cells.shuffle()
+
+		# Healing threshold based on distance
+		var heal_threshold := 100
+		if distance > 200:
+			heal_threshold = 150
+		elif distance > 100:
+			heal_threshold = 120
+
+		var item_pool := []
+		for item in InventoryGlobal.items:
+			if get_heal_amount(item["item_effect"]) >= heal_threshold:
+				item_pool.append(item)
+
+		if item_pool.size() == 0:
+			print("Room", room_id, "has no matching items for heal threshold", heal_threshold)
+			continue
+
+		for i in range(min(count_per_room, valid_cells.size())):
+			var item_data = item_pool[randi() % item_pool.size()]
+			var quantity = randi() % 3 + 1
+			spawn_item(quantity, item_data, valid_cells[i])
+			print("Spawned", item_data["item_name"], "x", quantity, "in room", room_id)
+			
+func spawn_item(quantity,data,position):
+	var item_scene = preload("res://inventory/scenes/game_item.tscn")
+	var item_instance = item_scene.instantiate()
+	item_instance.initiate_items(quantity+1,data["item_name"],data["item_type"],data["item_effect"],data["item_texture"])
+	print(quantity+1,data["item_name"],data["item_type"],data["item_effect"],data["item_texture"])
+	item_instance.global_position = position
+	items.add_child(item_instance)
+	

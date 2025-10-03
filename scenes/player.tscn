@@ -564,6 +564,7 @@ size = Vector2(26, 27)
 
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 process_mode = 3
+collision_layer = 3
 script = ExtResource("1_8rcgv")
 
 [node name="CharStateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
