@@ -1,6 +1,7 @@
-[gd_scene load_steps=18 format=4 uid="uid://dile8xc6cko2r"]
+[gd_scene load_steps=19 format=4 uid="uid://dile8xc6cko2r"]
 
 [ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/test/main.gd" id="1_ya4ey"]
+[ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_ya4ey"]
 [ext_resource type="TileSet" uid="uid://b5w6h4x5y1w7f" path="res://textures/world.tres" id="3_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://bfbwkogkdn0jn" path="res://scenes/player.tscn" id="3_h2yge"]
 [ext_resource type="PackedScene" uid="uid://dmj5xatxwxxnv" path="res://scenes/slime_spawner.tscn" id="5_trceg"]
@@ -89,6 +90,7 @@ script = ExtResource("1_ya4ey")
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2230, 1210)
 zoom = Vector2(0.25, 0.25)
+script = ExtResource("2_ya4ey")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 scale = Vector2(1.02587, 1.01297)

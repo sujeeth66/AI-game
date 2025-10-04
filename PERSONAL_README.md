@@ -32,3 +32,7 @@
 &emsp;&emsp;&emsp;05:21-successfully implemented flood fill for loot assignment  
 &emsp;&emsp;&emsp;06:34-trying to implement items spawn logic according to room tiers  
 &emsp;&emsp;&emsp;07:02-end of day  
+
+## Day-6(OCT 4,2025):  
+&emsp;&emsp;&emsp;09:56-start  
+&emsp;&emsp;&emsp;11:25-trying to implement items spawn positions to be global positions  

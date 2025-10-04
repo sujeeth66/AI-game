@@ -57,11 +57,12 @@ func _ready():
 	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
 	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
-	spawn_items_in_rooms(rooms, 1)  # Spawns 3 items per room based on healing value
+	
 
 	tilemap.clear()
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
+	spawn_items_in_rooms(rooms, 1)  # Spawns 3 items per room based on healing value
 
 	for x in range(-3, 4):
 		for y in range(-3, 4):
@@ -135,12 +136,11 @@ func spawn_items_in_rooms(room_data: Dictionary, count_per_room := 2):
 			var y = pos.y
 
 			# Check if this is a solid tile with 3 air blocks above
-			if y >= 3 and map_grid[y][x] == 1:
-				if map_grid[y - 1][x] == 0 and map_grid[y - 2][x] == 0 and map_grid[y - 3][x] == 0:
-					var cell_pos = Vector2i(x, map_height - y - 1)
-					var world_pos = tilemap.map_to_local(cell_pos)
-					world_pos -= Vector2(-20, 20)
-					valid_cells.append(world_pos)
+			if map_grid[y - 1][x] == 1:
+				print(pos)
+				if map_grid[y][x] in [4,5,6] and map_grid[y + 1][x] in [4,5,6] and map_grid[y + 2][x] in [4,5,6]:
+					var cell_pos = Vector2i(x, map_height - y )
+					valid_cells.append(cell_pos)
 
 		if valid_cells.size() == 0:
 			print("Room", room_id, "has no valid floor spawn cells")
@@ -167,7 +167,12 @@ func spawn_items_in_rooms(room_data: Dictionary, count_per_room := 2):
 		for i in range(min(count_per_room, valid_cells.size())):
 			var item_data = item_pool[randi() % item_pool.size()]
 			var quantity = randi() % 3 + 1
-			spawn_item(quantity, item_data, valid_cells[i])
+			var cell_pos = Vector2i(valid_cells[i].x + 4,valid_cells[i].y - 1)
+			var world_pos = tilemap.map_to_local(cell_pos)
+			spawn_item(quantity, item_data, world_pos)
+
+			tilemap.set_cell(Vector2i(valid_cells[i].x,valid_cells[i].y),0,Vector2i(0,9))
+			print("valid cells[",i,"]",valid_cells[i])
 			print("Spawned", item_data["item_name"], "x", quantity, "in room", room_id)
 			
 func spawn_item(quantity,data,position):
