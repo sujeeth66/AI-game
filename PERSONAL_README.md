@@ -36,3 +36,4 @@
 ## Day-6(OCT 4,2025):  
 &emsp;&emsp;&emsp;09:56-start  
 &emsp;&emsp;&emsp;11:25-trying to implement items spawn positions to be global positions  
+&emsp;&emsp;&emsp;01:15-successfully implemented items spawn logic based on room tiers  

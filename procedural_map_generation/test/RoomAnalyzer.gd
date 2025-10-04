@@ -50,7 +50,7 @@ static func flood_fill_distance(grid: Array, start: Vector2i) -> Dictionary:
 				continue
 			if visited.has(next):
 				continue
-			if grid[next.y][next.x] != 0 and grid[next.y][next.x] != 2:
+			if grid[next.y][next.x] not in [0, 2, 4, 5, 6]:
 				continue
 
 			visited[next] = true
