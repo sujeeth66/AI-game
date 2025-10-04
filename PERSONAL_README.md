@@ -37,3 +37,5 @@
 &emsp;&emsp;&emsp;09:56-start  
 &emsp;&emsp;&emsp;11:25-trying to implement items spawn positions to be global positions  
 &emsp;&emsp;&emsp;01:15-successfully implemented items spawn logic based on room tiers  
+&emsp;&emsp;&emsp;07:41-trying to implement city terrain generation  
+&emsp;&emsp;&emsp;08:02-end of day  

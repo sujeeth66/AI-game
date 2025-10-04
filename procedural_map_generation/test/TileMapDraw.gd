@@ -8,7 +8,7 @@ static func draw_grid_to_tilemap(tilemap: TileMapLayer, grid: Array, map_width: 
 				#2:
 					#tilemap.set_cell(cell_pos, 0, Vector2i(7, 0))  # tunnel room
 				3:
-					tilemap.set_cell(cell_pos, 0, Vector2i(8, 0))  # tunnel connector
+					tilemap.set_cell(cell_pos, 0, Vector2i(7, 0))  # tunnel connector
 				4:
 					tilemap.set_cell(cell_pos, 0, Vector2i(0, 15))  # tunnel connector
 				5:

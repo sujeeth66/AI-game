@@ -11,8 +11,8 @@ static func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100,
 		if pos.x < 5 or pos.x >= grid[0].size() - 5 or pos.y < 1 or pos.y >= grid.size() - 1:
 			break
 
-		for y in range(-2, 3):
-			for x in range(-1, 2):
+		for y in range(-1, 2):
+			for x in range(-2, 3):
 				var carve_pos = Vector2i(pos.x + x, pos.y + y)
 				grid[carve_pos.y][carve_pos.x] = 2
 				if not carved_positions.has(carve_pos):
@@ -69,7 +69,7 @@ static func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, h
 
 	var room_index := 0
 
-	for i in range(0, roof_starts.size(), 10):
+	for i in range(0, roof_starts.size(), 5):
 		if i < roof_starts.size():
 			var start = roof_starts[i]
 			var dir = Vector2i(-1, -1) if rng.randf() < 0.5 else Vector2i(1, -1)
@@ -78,7 +78,7 @@ static func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, h
 			room_tiles[room_index] = carved
 			room_index += 1
 
-	for i in range(0, floor_starts.size(), 10):
+	for i in range(0, floor_starts.size(), 5):
 		if i < floor_starts.size():
 			var start = floor_starts[i]
 			var dir = Vector2i(-1, 1) if rng.randf() < 0.5 else Vector2i(1, 1)

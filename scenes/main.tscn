@@ -1,7 +1,6 @@
-[gd_scene load_steps=19 format=4 uid="uid://dile8xc6cko2r"]
+[gd_scene load_steps=16 format=4 uid="uid://dile8xc6cko2r"]
 
 [ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/test/main.gd" id="1_ya4ey"]
-[ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_ya4ey"]
 [ext_resource type="TileSet" uid="uid://b5w6h4x5y1w7f" path="res://textures/world.tres" id="3_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://bfbwkogkdn0jn" path="res://scenes/player.tscn" id="3_h2yge"]
 [ext_resource type="PackedScene" uid="uid://dmj5xatxwxxnv" path="res://scenes/slime_spawner.tscn" id="5_trceg"]
@@ -9,8 +8,6 @@
 [ext_resource type="Script" uid="uid://cf8wf7o6vqcv7" path="res://quest system/Resources/Quest/Quest.gd" id="7_jkv2x"]
 [ext_resource type="Script" uid="uid://dwice8iy7ng3d" path="res://quest system/Resources/Quest/Objectives.gd" id="8_jbj1t"]
 [ext_resource type="Script" uid="uid://5dvtjkl50wsh" path="res://quest system/Resources/Quest/Rewards.gd" id="9_muem4"]
-[ext_resource type="PackedScene" uid="uid://3sl0pg6mnoc5" path="res://inventory/scenes/game_item.tscn" id="10_dp3eg"]
-[ext_resource type="Texture2D" uid="uid://b78rew4eowg6y" path="res://textures/apple_icon.png" id="11_0ld40"]
 
 [sub_resource type="Resource" id="Resource_f6ptj"]
 script = ExtResource("8_jbj1t")
@@ -90,7 +87,6 @@ script = ExtResource("1_ya4ey")
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2230, 1210)
 zoom = Vector2(0.25, 0.25)
-script = ExtResource("2_ya4ey")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 tile_map_data = PackedByteArray("AADk/wIAAAAAAAAAAADl/wIAAAAAAAAAAADm/wIAAAAAAAAAAADn/wIAAAAAAAAAAADo/wIAAAAAAAAAAADp/wIAAAAAAAAAAADq/wIAAAAAAAAAAADr/wIAAAAAAAAAAADs/wIAAAAAAAAAAADt/wIAAAAAAAAAAADu/wIAAAAAAAAAAADv/wIAAAAAAAAAAADw/wIAAAAAAAAAAADx/wMAAAAAAAAAAADy/wMAAAAAAAAAAADz/wMAAAAAAAAAAAD0/wMAAAAAAAAAAAD1/wMAAAAAAAAAAAD2/wMAAAAAAAAAAAD3/wMAAAAAAAAAAAD4/wMAAAAAAAAAAAD5/wMAAAAAAAAAAAD6/wMAAAAAAAAAAAD7/wMAAAAAAAAAAAD8/wMAAAAAAAAAAAD9/wMAAAAAAAAAAAD+/wMAAAAAAAAAAAD//wMAAAAAAAAAAAAAAAMAAAAAAAAAAAABAAMAAAAAAAAAAAACAAMAAAAAAAAAAAADAAMAAAAAAAAAAAAEAAMAAAAAAAAAAAAFAAMAAAAAAAAAAAAGAAMAAAAAAAAAAAAHAAMAAAAAAAAAAAAIAAMAAAAAAAAAAAAJAAMAAAAAAAAAAAAKAAQAAAAAAAAAAAALAAQAAAAAAAAAAAAMAAQAAAAAAAAAAAANAAQAAAAAAAAAAAAOAAQAAAAAAAAAAAAPAAQAAAAAAAAAAAAQAAQAAAAAAAAAAAARAAQAAAAAAAAAAAASAAQAAAAAAAAAAAATAAQAAAAAAAAAAAAUAAQAAAAAAAAAAAAVAAQAAAAAAAAAAAAWAAQAAAAAAAAAAAAXAAQAAAAAAAAAAAAYAAQAAAAAAAAAAAAZAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAAbAAQAAAAAAAAAAAAcAAQAAAAAAAAAAAAdAAQAAAAAAAAAAAAeAAQAAAAAAAAAAAAfAAQAAAAAAAAAAAAgAAQAAAAAAAAAAAAhAAQAAAAAAAAAAAAiAAQAAAAAAAAAAAAjAAUAAAAAAAAAAAAkAAUAAAAAAAAAAAAlAAUAAAAAAAAAAAAmAAUAAAAAAAAAAAAnAAUAAAAAAAAAAAAoAAUAAAAAAAAAAAApAAUAAAAAAAAAAAAqAAUAAAAAAAAAAAArAAUAAAAAAAAAAAAsAAUAAAAAAAAAAAAtAAUAAAAAAAAAAAAuAAUAAAAAAAAAAAAvAAUAAAAAAAAAAAAwAAUAAAAAAAAAAAAxAAQAAAAAAAAAAAAxAAMAAAAAAAAAAAAyAAIAAAAAAAAAAAAyAAEAAAAAAAAAAAAzAAAAAAAAAAAAAAA0AP//AAAAAAAAAAA0AP7/AAAAAAAAAAA1AP3/AAAAAAAAAAA1APz/AAAAAAAAAAA2APv/AAAAAAAAAAA3APr/AAAAAAAAAAA3APn/AAAAAAAAAAA4APj/AAAAAAAAAAA5APf/AAAAAAAAAAA5APb/AAAAAAAAAAA6APX/AAAAAAAAAAA6APT/AAAAAAAAAAA7APP/AAAAAAAAAAASAAMAAAAAAAAAAAASAAIAAAAAAAAAAAASAAEAAAAAAAAAAAA=")
@@ -121,11 +117,3 @@ position = Vector2(-131, 32)
 npc_id = "npc_2"
 npc_name = "gasagasalu"
 quests = Array[ExtResource("7_jkv2x")]([SubResource("Resource_0q20i")])
-
-[node name="GameItem" parent="." instance=ExtResource("10_dp3eg")]
-position = Vector2(-78, 28)
-item_quantity = 10
-item_type = "quest_item"
-item_name = "apple"
-item_texture = ExtResource("11_0ld40")
-item_effect = "heal - 100"

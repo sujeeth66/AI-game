@@ -113,7 +113,7 @@ static func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, play
 			"distance": closest_dist
 		})
 
-		print("Room", room_id, "center:", center, "distance:", closest_dist, "tier:", tier)
+		#print("Room", room_id, "center:", center, "distance:", closest_dist, "tier:", tier)
 
 	# Sort rooms by distance
 	room_data.sort_custom(func(a, b): return a["distance"] < b["distance"])
