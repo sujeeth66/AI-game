@@ -43,7 +43,7 @@ static func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100,
 
 	return carved_positions
 	
-static func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, height: int, seed: int) -> Dictionary:
+static func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, height: int, seed: int,room_shape := "organic") -> Dictionary:
 	var roof_starts := []
 	var floor_starts := []
 	var room_starts := []
@@ -69,7 +69,7 @@ static func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, h
 
 	var room_index := 0
 
-	for i in range(0, roof_starts.size(), 5):
+	for i in range(0, roof_starts.size(), 10):
 		if i < roof_starts.size():
 			var start = roof_starts[i]
 			var dir = Vector2i(-1, -1) if rng.randf() < 0.5 else Vector2i(1, -1)
@@ -78,7 +78,7 @@ static func generate_tunnel_rooms(grid: Array, tunnel_path: Array, width: int, h
 			room_tiles[room_index] = carved
 			room_index += 1
 
-	for i in range(0, floor_starts.size(), 5):
+	for i in range(0, floor_starts.size(), 10):
 		if i < floor_starts.size():
 			var start = floor_starts[i]
 			var dir = Vector2i(-1, 1) if rng.randf() < 0.5 else Vector2i(1, 1)

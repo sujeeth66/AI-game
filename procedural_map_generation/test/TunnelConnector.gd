@@ -7,7 +7,7 @@ static func carve_cave_entrance(grid: Array, start: Vector2i, tunnel_path: Array
 	var rng = RandomNumberGenerator.new()
 	for p in tunnel_path:
 		tunnel_set[str(p)] = true
-
+	print("cave entrance")
 	var max_steps := 300
 	var steps := 0
 

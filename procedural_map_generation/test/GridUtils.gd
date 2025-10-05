@@ -1,9 +1,9 @@
-static func initialize_empty_grid(grid: Array, width: int, height: int):
+static func initialize_empty_grid(grid: Array, width: int, height: int, surface_height: int):
 	grid.clear()
 	for y in range(height):
 		var row := []
 		for x in range(width):
-			row.append(0 if y >= 86 else 1)
+			row.append(0 if y >= height - surface_height else 1)
 		grid.append(row)
 
 static func generate_surface_layer(
@@ -62,10 +62,35 @@ static func generate_surface_layer(
 
 		for y in range(base_y):
 			if y > cutoff:
-				grid[y + 85][x] = 1
+				if (y + 85) >= 0 and (y + 85) < grid.size():
+					if x >= 0 and x < grid[y + 85].size():
+						grid[y + (height - surface_height - 1)][x] = 1
 
 	return final_heights
-	
+
+static func generate_city_surface(grid: Array, start_x: int, segment_data: Array, cutoff := 0) -> Dictionary:
+	var final_heights := {}
+	var x_cursor = start_x
+
+	for segment in segment_data:
+		var length = segment["length"]
+		var surface_y: int
+		if segment.has("height"):
+			surface_y = segment["height"]
+		else:
+			surface_y = get_default_city_height(segment["type"])
+
+		for x in range(x_cursor, x_cursor + length):
+			final_heights[x] = surface_y
+			for y in range(surface_y):
+				if y > cutoff:
+					#print(surface_y)
+					grid[150-y-surface_y-25][x] = 1  # fill below surface_y
+
+		x_cursor += length
+
+	return final_heights
+
 static func enclose_grid(grid: Array, map_width: int, map_height: int):
 	for x in range(map_width):
 		grid[0][x] = 1  # top border
@@ -75,21 +100,9 @@ static func enclose_grid(grid: Array, map_width: int, map_height: int):
 		grid[y][0] = 1  # left border
 		grid[y][map_width - 1] = 1  # right border
 
-static func generate_city_surface(grid: Array, start_x: int, segment_data: Array, cutoff := 0) -> Dictionary:
-	var final_heights := {}
-	var x_cursor = start_x
-
-	for segment in segment_data:
-		var length = segment["length"]
-		var surface_y = segment["height"]  # this is the surface Y coordinate (from top)
-
-		for x in range(x_cursor, x_cursor + length):
-			final_heights[x] = surface_y
-			for y in range(surface_y):
-				if y > cutoff:
-					print(surface_y)
-					grid[150-y-segment["height"]-25][x] = 1  # fill below surface_y
-
-		x_cursor += length
-
-	return final_heights
+static func get_default_city_height(segment_type: String) -> int:
+	match segment_type:
+		"road": return 28
+		"building": return 25
+		"park": return 26
+		_: return 27  # fallback

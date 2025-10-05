@@ -1,5 +1,14 @@
 
-static func carve_horizontal_tunnel(grid: Array, start_y: int, length: int, tunnel_width: int, seed: int, roughness := 0.2, curvyness := 0.3, max_shift := 2) -> Array:
+static func carve_horizontal_tunnel(grid: Array,
+ start_y: int,
+ length: int,
+ tunnel_width: int,
+ seed: int,
+ roughness := 0.2,
+ curvyness := 0.3,
+ max_shift := 2,
+ shape := "flat"  # options: "flat", "boxy", "organic"
+) -> Array:
 	var y = start_y
 	var width = tunnel_width
 	var path := []
@@ -11,13 +20,23 @@ static func carve_horizontal_tunnel(grid: Array, start_y: int, length: int, tunn
 			grid[ny][x] = 0
 			path.append(Vector2i(x, ny))
 
-		if randf() < roughness:
-			width += randi_range(-1, 1)
-			width = clamp(width, 15, 25)
-
-		if randf() < curvyness:
-			y += randi_range(-max_shift, max_shift)
-			y = clamp(y, 1, grid.size() - 2)
+		match shape:
+			"flat":
+				# No change to y or width
+				pass
+			"boxy":
+				if x % 20 == 0:
+					y += randi_range(-1, 1)
+					y = clamp(y, 1, grid.size() - 2)
+				if x % 30 == 0:
+					width = tunnel_width  # reset to default
+			"organic":
+				if randf() < roughness:
+					width += randi_range(-1, 1)
+					width = clamp(width, 15, 25)
+				if randf() < curvyness:
+					y += randi_range(-max_shift, max_shift)
+					y = clamp(y, 1, grid.size() - 2)
 
 	return path
 
@@ -51,8 +70,10 @@ static func smooth_tunnel(grid: Array, width: int, height: int, threshold := 5):
 						continue
 					var nx = clamp(x + dx, 0, width - 1)
 					var ny = clamp(y + dy, 0, height - 1)
-					if grid[ny][nx] == 1:
-						solid_neighbors += 1
+					if ny >= 0 and ny < grid.size():
+						if nx >= 0 and nx < grid[ny].size():
+							if grid[ny][nx] == 1:
+								solid_neighbors += 1
 			row.append(1 if solid_neighbors >= threshold else 0)
 		new_grid.append(row)
 

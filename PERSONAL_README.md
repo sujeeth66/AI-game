@@ -42,7 +42,7 @@
 
 ## Day-7(OCT 5,2025):  
 &emsp;&emsp;&emsp;10:56-start  
-&emsp;&emsp;&emsp;  
-&emsp;&emsp;&emsp;  
-&emsp;&emsp;&emsp;  
-&emsp;&emsp;&emsp;  
+&emsp;&emsp;&emsp;12:25-trying to implement city terrain generation  
+&emsp;&emsp;&emsp;02:15-trying to integrate functions to help AI  
+&emsp;&emsp;&emsp;07:14-trying to implement functions that help AI in map generation  
+&emsp;&emsp;&emsp;08:02-end of day  

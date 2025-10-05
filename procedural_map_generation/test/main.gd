@@ -3,8 +3,8 @@ extends Node2D
 @onready var tilemap := $TileMapLayer
 @onready var items : Node2D = $Items
 
-var map_width := 300
-var map_height := 150
+var map_width 
+var map_height 
 var surface_height := 65
 var seed := 12345
 var map_grid := []
@@ -15,17 +15,41 @@ var best_pos
 var terrain_change = []
 var rooms := {}
 var next_room_id := 0
-var terrain_segments = [
-	{ "type": "city", "length": 230 },
-	{ "type": "plain", "length": 70 },
-	#{ "type": "plain", "length": 80 }
-]
+var level_plan = {
+	"surface": {
+		"type": "forest",
+		"segments": [
+			{ "type": "plains", "length": 60 },
+			{ "type": "forest", "length": 100 },
+			{ "type": "mountains", "length": 80 }
+		]
+	},
+	"underground": {
+		"type": "caves",
+		"tunnels": 4,
+		"depth": 90,
+		"room_shape": "organic"
+	}
+}
 var city_segments = [
-	{ "length": 60, "height": 20 },
-	{ "length": 40, "height": 22 },  # small step up
-	{ "length": 80, "height": 20 },  # back to flat
-	{ "length": 50, "height": 28 }   # small step down
+	{ "type": "road", "length": 20 },
+	{ "type": "building", "length": 30 },
+	{ "type": "park", "length": 20 },
+	{ "type": "building", "length": 30 },
+	{ "type": "road", "length": 20 }
 ]
+var city_level_plan = {
+	"surface": {
+		"type": "city",
+		"segments": city_segments  # defined separately
+	},
+	"underground": {
+		"type": "sewer",
+		"tunnels": 2,
+		"depth": 60,
+		"room_shape": "boxy"
+	}
+}
 
 const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
 const TunnelGen = preload("res://procedural_map_generation/test/TunnelGen.gd")
@@ -35,14 +59,19 @@ const TunnelUtils = preload("res://procedural_map_generation/test/TunnelUtils.gd
 const TilemapDraw = preload("res://procedural_map_generation/test/TileMapDraw.gd")
 const RoomAnalyzer = preload("res://procedural_map_generation/test/RoomAnalyzer.gd")
 const ItemSpawner = preload("res://procedural_map_generation/test/ItemSpawner.gd")
+const MapGen = preload("res://procedural_map_generation/test/MapGeneration.gd")
 
 func _ready():
 	tilemap.clear()
-	GridUtils.initialize_empty_grid(map_grid, map_width, map_height)
+	var dims = MapGen.compute_map_dimensions(level_plan["surface"]["segments"], level_plan["underground"], surface_height, 30)
+	map_width = dims["width"]
+	map_height = dims["height"]
+	print("map width and height: ",map_width,",",map_height)
+	GridUtils.initialize_empty_grid(map_grid, map_width, map_height,surface_height)
 	var x_cursor = 0
 	var last_heights = {}
 	
-	for segment in terrain_segments:
+	for segment in level_plan["surface"]["segments"]:
 		var segment_length = segment["length"]
 		var terrain_type = segment["type"]
 		var end_x = x_cursor + segment_length
@@ -67,51 +96,67 @@ func _ready():
 				last_heights
 			)
 			x_cursor = end_x
-
 		terrain_change.append(x_cursor)
-
-	var tunnel_path = TunnelGen.carve_horizontal_tunnel(map_grid, 80, 300, 7, seed)
-	for i in range(2):
-		TunnelGen.roughen_tunnel_floor_with_moore(map_grid, map_width, map_height)
-	TunnelGen.smooth_tunnel(map_grid, map_width, map_height)
-
-	var closest_pos = TunnelUtils.find_min_surface_tunnel_distance(map_grid, map_width, map_height)
-	#print("Closest surface-tunnel column at x =", closest_pos)
-
-	TunnelConnector.carve_cave_entrance(map_grid, closest_pos, tunnel_path, map_width, map_height)
-
-	var tunnel_path_2 = TunnelGen.carve_horizontal_tunnel(map_grid, 30, 300, 10, seed)
-	var distant_x = TunnelUtils.find_distant_column(closest_pos.x, map_width, seed, 80)
-	var tunnel11_y = TunnelUtils.get_tunnel_y_from_path(tunnel_path, distant_x, "floor")
-
-	TunnelConnector.carve_cave_entrance(map_grid, Vector2i(distant_x, tunnel11_y), tunnel_path_2, map_width, map_height)
 	
-	var room_tiles_1 = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
-	var room_tiles_2 = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path_2, map_width, map_height, seed)
+	var ug = level_plan["underground"]
+	var tunnel_y_start =  25  # start carving below surface
+	var tunnel_paths := []
+	for i in range(ug["tunnels"]):
+		var tunnel_y = tunnel_y_start + i * 40
+		
+		var tunnel_path = TunnelGen.carve_horizontal_tunnel(
+			map_grid, tunnel_y, map_width, 10, seed, 0.2, 0.3, 2, ug["room_shape"]
+		)
+		print("tunnel made")
+		tunnel_paths.append(tunnel_path)
+	
+	var last_entrance_x = 0
+	var closest_pos = TunnelUtils.find_min_surface_tunnel_distance(map_grid, map_width, map_height)
+	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
+	var previous_tunnel_path = null
+	for i in range(tunnel_paths.size() - 1, -1, -1):
+		var tunnel_path = tunnel_paths[i]
+		if previous_tunnel_path == null:
+			# First tunnel: carve from surface
+			TunnelConnector.carve_cave_entrance(map_grid, closest_pos, tunnel_path, map_width, map_height)
+			last_entrance_x = closest_pos.x
+		else:
+			# Subsequent tunnels: carve from previous tunnel
+			var distant_x = TunnelUtils.find_distant_column(last_entrance_x, map_width, seed, 80)
+			last_entrance_x = distant_x
+			var upper_y = TunnelUtils.get_tunnel_y_from_path(previous_tunnel_path, distant_x, "floor")
+			if upper_y == -1:
+				print("Entrance skipped: no upper tunnel at x =", distant_x)
+				continue
+
+			TunnelConnector.carve_cave_entrance(map_grid, Vector2i(distant_x, upper_y), tunnel_path, map_width, map_height)
+		# Update previous tunnel reference
+		previous_tunnel_path = tunnel_path
 	
 	var all_room_tiles := {}
-	for key in room_tiles_1.keys():
-		all_room_tiles[key] = room_tiles_1[key]
-	for key in room_tiles_2.keys():
-		all_room_tiles[key + room_tiles_1.size()] = room_tiles_2[key]
+	for tunnel_path in tunnel_paths:
+		var room_tiles = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
+		for key in room_tiles.keys():
+			all_room_tiles[key + all_room_tiles.size()] = room_tiles[key]
 	
-	var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
 	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
-	
 	merge_connected_rooms(rooms)
+	
 	var distance_result = RoomAnalyzer.flood_fill_distance(map_grid, Vector2i(spawn_pos.x, map_height - spawn_pos.y))
 	var distance_map = distance_result["map"]
-	
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
+	
 	for i in terrain_change:
 		tilemap.set_cell(Vector2i(i,10),0,Vector2i(0,9))
 		tilemap.set_cell(Vector2i(i,11),0,Vector2i(0,9))
 		tilemap.set_cell(Vector2i(i,12),0,Vector2i(0,9))
 		tilemap.set_cell(Vector2i(i,13),0,Vector2i(0,9))
 		tilemap.set_cell(Vector2i(i,14),0,Vector2i(0,9))
+	
 	ItemSpawner.spawn_items_in_rooms(rooms, 1, distance_map, tilemap, items, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
+	
 	for x in range(-3, 4):
 		for y in range(-3, 4):
 			tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(0, 4))
@@ -119,7 +164,7 @@ func _ready():
 
 func __ready():
 	tilemap.clear()
-	GridUtils.initialize_empty_grid(map_grid, map_width, map_height)
+	GridUtils.initialize_empty_grid(map_grid, map_width, map_height,surface_height)
 	GridUtils.generate_surface_layer(map_grid, map_width, map_height, surface_height, seed)
 
 	var tunnel_path = TunnelGen.carve_horizontal_tunnel(map_grid, 80, 300, 7, seed)
@@ -190,7 +235,7 @@ func visualize_flood_fill_wave_fast(tilemap: TileMapLayer, grid: Array, start: V
 				continue
 			if visited.has(next):
 				continue
-			if grid[next.y][next.x] != 0 and grid[next.y][next.x] != 2 and grid[next.y][next.x] != 4 and grid[next.y][next.x] != 5 and grid[next.y][next.x] != 6:
+			if grid[next.y][next.x] != 0 and grid[next.y][next.x] != 2 and grid[next.y][next.x] != 4 and grid[next.y][next.x] != 5 and grid[next.y][next.x] != 6 and grid[next.y][next.x] != 7:
 				continue
 
 			visited[next] = true
