@@ -39,3 +39,10 @@
 &emsp;&emsp;&emsp;01:15-successfully implemented items spawn logic based on room tiers  
 &emsp;&emsp;&emsp;07:41-trying to implement city terrain generation  
 &emsp;&emsp;&emsp;08:02-end of day  
+
+## Day-7(OCT 5,2025):  
+&emsp;&emsp;&emsp;10:56-start  
+&emsp;&emsp;&emsp;  
+&emsp;&emsp;&emsp;  
+&emsp;&emsp;&emsp;  
+&emsp;&emsp;&emsp;  
