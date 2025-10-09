@@ -145,7 +145,8 @@ func _ready():
 	
 	ItemSpawner.spawn_items_in_rooms(rooms, 1, distance_map, tilemap, items, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
-	
+	#print("Processed ",processed_rooms," rooms, skipped ",skipped_rooms," rooms")
+	#print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_valid,")")
 	for x in range(-3, 4):
 		for y in range(-3, 4):
 			tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(0, 4))

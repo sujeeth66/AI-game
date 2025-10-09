@@ -14,7 +14,7 @@ static func carve_simple_random_walk(grid: Array, start: Vector2i, steps := 100,
 		for y in range(-1, 2):
 			for x in range(-2, 3):
 				var carve_pos = Vector2i(pos.x + x, pos.y + y)
-				grid[carve_pos.y][carve_pos.x] = 0
+				grid[carve_pos.y][carve_pos.x] = 2
 				if not carved_positions.has(carve_pos):
 					carved_positions.append(carve_pos)
 

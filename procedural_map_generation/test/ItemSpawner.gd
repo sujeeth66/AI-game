@@ -88,7 +88,7 @@ static func find_flat_spawn_tile(room_id: int, room_data: Dictionary, distance_m
 
 			if not distance_map.has(grid_pos):
 				continue
-			if map_grid[y][x] == 2:  # solid room tile
+			if map_grid[y-1][x] == 1:  # solid room tile
 				var dist = distance_map[grid_pos]
 				if dist > max_distance:
 					max_distance = dist
