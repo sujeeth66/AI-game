@@ -49,7 +49,7 @@ static func find_min_surface_tunnel_distance(grid: Array, map_width: int, map_he
 				var distance = surface_bottom - tunnel_top
 				if distance < min_distance:
 					min_distance = distance
-					best_pos = Vector2i(x, surface_bottom)
+					best_pos = Vector2i(x, surface_bottom+5)
 				break
 
 	return best_pos

@@ -79,7 +79,7 @@ static func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, play
 
 	for room_id in room_tiles.keys():
 		var region = room_tiles[room_id]
-		if region.size() <= 20:
+		if region.size() <= 5:
 			print("Skipped empty room:", room_id)
 			continue
 
@@ -102,7 +102,7 @@ static func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, play
 		var tier := "common"
 		if closest_dist > max_dist * 0.96:
 			tier = "epic"
-		elif closest_dist > max_dist * 0.53:
+		elif closest_dist > max_dist * 0.63:
 			tier = "rare"
 
 		room_data.append({

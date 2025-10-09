@@ -46,3 +46,15 @@
 &emsp;&emsp;&emsp;02:15-trying to integrate functions to help AI  
 &emsp;&emsp;&emsp;07:14-trying to implement functions that help AI in map generation  
 &emsp;&emsp;&emsp;08:02-end of day  
+
+## Day-8(OCT 6,2025):  
+&emsp;&emsp;&emsp;no work done due to college  
+
+## Day-9(OCT 7,2025):  
+&emsp;&emsp;&emsp;no work done due to college  
+
+## Day-10(OCT 8,2025):  
+&emsp;&emsp;&emsp;no work done due to college  
+
+## Day-11(OCT 9,2025):  
+&emsp;&emsp;&emsp;05:26-trying to implement AI helper functions
