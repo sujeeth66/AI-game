@@ -19,37 +19,25 @@ var level_plan = {
 	"surface": {
 		"type": "forest",
 		"segments": [
-			{ "type": "plains", "length": 60 },
-			{ "type": "forest", "length": 100 },
-			{ "type": "mountains", "length": 80 }
+			{ "type": "city", "length": 200 },
+			#{ "type": "forest", "length": 100 },
+			#{ "type": "mountains", "length": 80 }
 		]
 	},
 	"underground": {
 		"type": "caves",
-		"tunnels": 4,
+		"tunnels": 3,
 		"depth": 90,
 		"room_shape": "organic"
 	}
 }
 var city_segments = [
-	{ "type": "road", "length": 20 },
-	{ "type": "building", "length": 30 },
-	{ "type": "park", "length": 20 },
-	{ "type": "building", "length": 30 },
-	{ "type": "road", "length": 20 }
+	{ "type": "road", "length": 40, "height":25 },
+	{ "type": "building", "length": 40, "height":20 },
+	{ "type": "park", "length": 40, "height":25 },
+	{ "type": "building", "length": 40, "height":35 },
+	{ "type": "road", "length": 40, "height":30 }
 ]
-var city_level_plan = {
-	"surface": {
-		"type": "city",
-		"segments": city_segments  # defined separately
-	},
-	"underground": {
-		"type": "sewer",
-		"tunnels": 2,
-		"depth": 60,
-		"room_shape": "boxy"
-	}
-}
 
 const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
 const TunnelGen = preload("res://procedural_map_generation/test/TunnelGen.gd")
@@ -77,7 +65,8 @@ func _ready():
 		var end_x = x_cursor + segment_length
 
 		if terrain_type == "city":
-			last_heights = GridUtils.generate_city_surface(map_grid, x_cursor, city_segments, 0)
+			print("city----------------------")
+			last_heights = GridUtils.generate_city_surface(map_grid,map_height, x_cursor, city_segments, 0)
 			var city_total_length = 0
 			for seg in city_segments:
 				city_total_length += seg["length"]
@@ -99,10 +88,10 @@ func _ready():
 		terrain_change.append(x_cursor)
 	
 	var ug = level_plan["underground"]
-	var tunnel_y_start =  25  # start carving below surface
+	var tunnel_y_start =  45  # start carving below surface
 	var tunnel_paths := []
 	for i in range(ug["tunnels"]):
-		var tunnel_y = tunnel_y_start + i * 40
+		var tunnel_y = tunnel_y_start + i * 60
 		
 		var tunnel_path = TunnelGen.carve_horizontal_tunnel(
 			map_grid, tunnel_y, map_width, 10, seed, 0.2, 0.3, 2, ug["room_shape"]
@@ -165,7 +154,7 @@ func _ready():
 func __ready():
 	tilemap.clear()
 	GridUtils.initialize_empty_grid(map_grid, map_width, map_height,surface_height)
-	GridUtils.generate_surface_layer(map_grid, map_width, map_height, surface_height, seed)
+	#GridUtils.generate_surface_layer(map_grid, map_width, map_height, surface_height, seed)
 
 	var tunnel_path = TunnelGen.carve_horizontal_tunnel(map_grid, 80, 300, 7, seed)
 	for i in range(2):

@@ -12,7 +12,7 @@ static func generate_surface_layer(
 	height: int,
 	surface_height: int,
 	seed: int,
-	terrain_type := "dunes",
+	terrain_type,
 	start_x := 0,
 	end_x := width,
 	cutoff := 0,
@@ -61,31 +61,31 @@ static func generate_surface_layer(
 		final_heights[x] = base_y
 
 		for y in range(base_y):
-			if y > cutoff:
-				if (y + 85) >= 0 and (y + 85) < grid.size():
-					if x >= 0 and x < grid[y + 85].size():
-						grid[y + (height - surface_height - 1)][x] = 1
+			if (y + 85) >= 0 and (y + 85) < grid.size():
+				if x >= 0 and x < grid[y + 85].size():
+					grid[y + (height - surface_height - 1)][x] = 1
 
 	return final_heights
 
-static func generate_city_surface(grid: Array, start_x: int, segment_data: Array, cutoff := 0) -> Dictionary:
+static func generate_city_surface(grid: Array,map_height:int, start_x: int, segment_data: Array, cutoff := 0) -> Dictionary:
 	var final_heights := {}
 	var x_cursor = start_x
 
 	for segment in segment_data:
 		var length = segment["length"]
-		var surface_y: int
+		var segment_height: int
 		if segment.has("height"):
-			surface_y = segment["height"]
+			segment_height = segment["height"]
+			print("--------------------------------height got-",segment_height)
 		else:
-			surface_y = get_default_city_height(segment["type"])
+			segment_height = get_default_city_height(segment["type"])
 
 		for x in range(x_cursor, x_cursor + length):
-			final_heights[x] = surface_y
-			for y in range(surface_y):
-				if y > cutoff:
-					#print(surface_y)
-					grid[150-y-surface_y-25][x] = 1  # fill below surface_y
+			final_heights[x] = segment_height
+			for y in range(map_height):
+				if (y + 85) >= 0 and (y + 85) < grid.size():
+					if x >= 0 and x < grid[y + 85].size():
+						grid[segment_height-y-56][x] = 1  # fill below surface_y
 
 		x_cursor += length
 

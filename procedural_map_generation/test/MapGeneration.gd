@@ -8,7 +8,7 @@ static func generate_surface_segment(map_grid, segment: Dictionary, x_cursor: in
 	var last_heights = {}
 
 	if terrain_type == "city":
-		last_heights = GridUtils.generate_city_surface(map_grid, x_cursor, segment.get("city_segments", []), 0)
+		last_heights = GridUtils.generate_city_surface(map_grid,150, x_cursor, segment.get("city_segments", []), 0)
 	else:
 		last_heights = GridUtils.generate_surface_layer(
 			map_grid,
@@ -56,7 +56,7 @@ static func compute_map_dimensions(surface_segments: Array, underground : Dictio
 	if underground and underground.has("tunnels"):
 		tunnel_layers = underground["tunnels"]
 
-	var total_height := surface_height + (tunnel_layers * tunnel_height) + buffer
+	var total_height := surface_height + (tunnel_layers * tunnel_height) + (tunnel_layers * buffer)
 	return {
 		"width": total_width,
 		"height": total_height

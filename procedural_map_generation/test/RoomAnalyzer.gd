@@ -79,7 +79,7 @@ static func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, play
 
 	for room_id in room_tiles.keys():
 		var region = room_tiles[room_id]
-		if region.size() <= 5:
+		if region.size() <= 0:
 			print("Skipped empty room:", room_id)
 			continue
 

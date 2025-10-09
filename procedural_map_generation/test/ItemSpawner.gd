@@ -16,6 +16,7 @@ static func spawn_items_in_rooms(room_data: Dictionary, count_per_room: int, dis
 
 		var best_tile := find_flat_spawn_tile(room_id, room_data, distance_map, map_grid, map_width, map_height, tilemap)
 		if best_tile.y == -1:
+			print("Room", room_id, "skipped: no valid spawn tile found")
 			continue
 		var cell_pos = Vector2i(best_tile.x, map_height - best_tile.y)
 		var world_pos = tilemap.map_to_local(cell_pos)
@@ -61,6 +62,7 @@ static func find_flat_spawn_tile(room_id: int, room_data: Dictionary, distance_m
 	var max_distance := -1
 	var coords = room_data[room_id]["coords"]
 
+	# First pass: look for open platforms
 	for pos in coords:
 		var x = pos.x
 		var y = pos.y
@@ -76,6 +78,21 @@ static func find_flat_spawn_tile(room_id: int, room_data: Dictionary, distance_m
 			if dist > max_distance:
 				max_distance = dist
 				best_tile = grid_pos
+
+	# If no platform found, fallback to highest-distance solid tile
+	if best_tile == null:
+		for pos in coords:
+			var x = pos.x
+			var y = pos.y
+			var grid_pos = Vector2i(x, y)
+
+			if not distance_map.has(grid_pos):
+				continue
+			if map_grid[y][x] == 2:  # solid room tile
+				var dist = distance_map[grid_pos]
+				if dist > max_distance:
+					max_distance = dist
+					best_tile = grid_pos
 
 	return best_tile if best_tile != null else Vector2i(-1, -1)
 

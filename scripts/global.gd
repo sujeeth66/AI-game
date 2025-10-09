@@ -4,6 +4,10 @@ extends Node
 var player_position: Vector2 = Vector2.ZERO
 var can_move : bool = true
 
+#main.gd
+var all_tunnel_tiles := {}
+var tunnel_exclusion_sets := []
+
 var global_quest_ui : Control
 var global_quest_manager : Node2D
 var player: CharacterBody2D 
