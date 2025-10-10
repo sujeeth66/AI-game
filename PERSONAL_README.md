@@ -65,6 +65,7 @@
 &emsp;&emsp;&emsp;09:56-start  
 &emsp;&emsp;&emsp;11:25-general maintenance  
 &emsp;&emsp;&emsp;01:25-trying to implement camera controls  
-&emsp;&emsp;&emsp;04:25-trying to implement a chest system
+&emsp;&emsp;&emsp;04:25-trying to implement a chest system  
+&emsp;&emsp;&emsp;05:02-end of day  
 
 
