@@ -58,4 +58,10 @@
 
 ## Day-11(OCT 9,2025):  
 &emsp;&emsp;&emsp;05:26-trying to implement AI helper functions  
-&emsp;&emsp;&emsp;08:08-enhancing room tiering algorithm
+&emsp;&emsp;&emsp;08:08-enhancing room tiering algorithm  
+&emsp;&emsp;&emsp;08:023-end of day  
+
+## Day-12(OCT 10,2025):  
+&emsp;&emsp;&emsp;09:56-start  
+&emsp;&emsp;&emsp;11:25-general maintenance
+

@@ -1,17 +1,20 @@
 
-static func carve_horizontal_tunnel(grid: Array,
- start_y: int,
- length: int,
- tunnel_width: int,
- seed: int,
- roughness := 0.2,
- curvyness := 0.3,
- max_shift := 2,
- shape := "flat"  # options: "flat", "boxy", "organic"
+static func carve_horizontal_tunnel(
+	grid: Array,
+	start_y: int,
+	length: int,
+	tunnel_width: int,
+	seed: int,
+	roughness := 0.2,
+	curvyness := 0.3,
+	max_shift := 2,
+	max_total_skew := 10,  # NEW: max vertical deviation from start_y
+	shape := "flat"
 ) -> Array:
 	var y = start_y
 	var width = tunnel_width
 	var path := []
+	var total_skew := 0  # NEW
 
 	for x in range(length):
 		var top = clamp(y - width / 2, 1, grid.size() - 2)
@@ -35,9 +38,12 @@ static func carve_horizontal_tunnel(grid: Array,
 					width += randi_range(-1, 1)
 					width = clamp(width, 15, 25)
 				if randf() < curvyness:
-					y += randi_range(-max_shift, max_shift)
-					y = clamp(y, 1, grid.size() - 2)
-
+					var delta = randi_range(-max_shift, max_shift)
+					var new_skew = total_skew + delta
+					if abs(new_skew) <= max_total_skew:
+						y += delta
+						y = clamp(y, 1, grid.size() - 2)
+						total_skew = new_skew
 	return path
 
 static func roughen_tunnel_floor_with_moore(grid: Array, width: int, height: int, seed := 98765):

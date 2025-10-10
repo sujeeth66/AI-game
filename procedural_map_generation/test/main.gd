@@ -19,16 +19,15 @@ var level_plan = {
 	"surface": {
 		"type": "forest",
 		"segments": [
-			{ "type": "city", "length": 200 },
-			#{ "type": "forest", "length": 100 },
-			#{ "type": "mountains", "length": 80 }
+			{ "type": "plains", "length": 100 },
+			{ "type": "forest", "length": 100 },
+			{ "type": "mountains", "length": 80 }
 		]
 	},
 	"underground": {
 		"type": "caves",
 		"tunnels": 3,
-		"depth": 90,
-		"room_shape": "organic"
+		"room_shape": "flat"
 	}
 }
 var city_segments = [
@@ -88,13 +87,13 @@ func _ready():
 		terrain_change.append(x_cursor)
 	
 	var ug = level_plan["underground"]
-	var tunnel_y_start =  45  # start carving below surface
+	var tunnel_y_start =  25  # start carving below surface
 	var tunnel_paths := []
 	for i in range(ug["tunnels"]):
-		var tunnel_y = tunnel_y_start + i * 60
+		var tunnel_y = tunnel_y_start + i * 50
 		
 		var tunnel_path = TunnelGen.carve_horizontal_tunnel(
-			map_grid, tunnel_y, map_width, 10, seed, 0.2, 0.3, 2, ug["room_shape"]
+			map_grid, tunnel_y, map_width, 10, seed, 0.2, 0.3, 2,10, ug["room_shape"]
 		)
 		print("tunnel made")
 		tunnel_paths.append(tunnel_path)
