@@ -113,3 +113,27 @@ static func is_open_platform(x: int, y: int, map_grid: Array, map_width: int, ma
 			return false
 
 	return true
+
+static func spawn_boss_reward(tilemap: TileMapLayer, items: Node2D, map_grid: Array, map_width: int, map_height: int, tunnels: int):
+	var spawn_pos_tile
+	if tunnels % 2 == 0:
+		spawn_pos_tile = Vector2i(map_width-10,map_height-20)
+	else:
+		spawn_pos_tile = Vector2i(10,map_height-20)
+		
+	var heal_threshold := 100
+	var item_pool := []
+	for item in InventoryGlobal.items:
+		if get_heal_amount(item["item_effect"]) >= heal_threshold:
+			item_pool.append(item)
+
+	if item_pool.size() == 0:
+		print("Room has no matching items for heal threshold", heal_threshold)
+	var spawn_pos = tilemap.map_to_local(spawn_pos_tile)
+	print(spawn_pos)
+	
+	var item_data = item_pool[randi() % item_pool.size()]
+	var quantity = randi() % 5 + 1
+	spawn_item(quantity, item_data, spawn_pos, items)
+	
+	tilemap.set_cell(spawn_pos_tile, 0, Vector2i(0, 9))

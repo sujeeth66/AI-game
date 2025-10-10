@@ -26,7 +26,7 @@ var level_plan = {
 	},
 	"underground": {
 		"type": "caves",
-		"tunnels": 3,
+		"tunnels": 2,
 		"room_shape": "flat"
 	}
 }
@@ -89,8 +89,12 @@ func _ready():
 	var ug = level_plan["underground"]
 	var tunnel_y_start =  25  # start carving below surface
 	var tunnel_paths := []
+	var tunnel_y = tunnel_y_start  * 50
 	for i in range(ug["tunnels"]):
-		var tunnel_y = tunnel_y_start + i * 50
+		if ug["room_shape"] == "flat":
+			tunnel_y = tunnel_y_start + i * 25
+		elif ug["room_shape"] == "organic":
+			tunnel_y = tunnel_y_start + i * 50
 		
 		var tunnel_path = TunnelGen.carve_horizontal_tunnel(
 			map_grid, tunnel_y, map_width, 10, seed, 0.2, 0.3, 2,10, ug["room_shape"]
@@ -120,19 +124,21 @@ func _ready():
 			TunnelConnector.carve_cave_entrance(map_grid, Vector2i(distant_x, upper_y), tunnel_path, map_width, map_height)
 		# Update previous tunnel reference
 		previous_tunnel_path = tunnel_path
-	
-	var all_room_tiles := {}
-	for tunnel_path in tunnel_paths:
-		var room_tiles = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
-		for key in room_tiles.keys():
-			all_room_tiles[key + all_room_tiles.size()] = room_tiles[key]
-	
-	GridUtils.enclose_grid(map_grid, map_width, map_height)
-	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
-	merge_connected_rooms(rooms)
-	
+	if ug["room_shape"] == "flat":
+		ItemSpawner.spawn_boss_reward(tilemap,items,map_grid,map_width,map_height,ug["tunnels"])
+	else:
+		var all_room_tiles := {}
+		for tunnel_path in tunnel_paths:
+			var room_tiles = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
+			for key in room_tiles.keys():
+				all_room_tiles[key + all_room_tiles.size()] = room_tiles[key]
+		
+		RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
+		merge_connected_rooms(rooms)
+		
 	var distance_result = RoomAnalyzer.flood_fill_distance(map_grid, Vector2i(spawn_pos.x, map_height - spawn_pos.y))
 	var distance_map = distance_result["map"]
+	GridUtils.enclose_grid(map_grid, map_width, map_height)
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
 	
 	for i in terrain_change:
@@ -146,9 +152,10 @@ func _ready():
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
 	#print("Processed ",processed_rooms," rooms, skipped ",skipped_rooms," rooms")
 	#print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_valid,")")
-	for x in range(-3, 4):
-		for y in range(-3, 4):
+	for x in range(1):
+		for y in range(1):
 			tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(0, 4))
+			tilemap.set_cell(Vector2i(closest_pos.x,150-closest_pos.y), 0, Vector2i(5, 4))
 
 
 func __ready():
@@ -199,7 +206,8 @@ func __ready():
 static func find_valid_spawn(grid: Array, x: int, map_height: int) -> Vector2i:
 	for y in range(map_height):
 		if grid[y][x] == 0 or grid[y][x] == 2:
-			return Vector2i(x, y)
+			print("cave or room",y)
+			return Vector2i(x, 6)
 	return Vector2i(x, 0)  # fallback
 
 static func get_player_pos():

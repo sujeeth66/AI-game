@@ -27,12 +27,6 @@ static func carve_horizontal_tunnel(
 			"flat":
 				# No change to y or width
 				pass
-			"boxy":
-				if x % 20 == 0:
-					y += randi_range(-1, 1)
-					y = clamp(y, 1, grid.size() - 2)
-				if x % 30 == 0:
-					width = tunnel_width  # reset to default
 			"organic":
 				if randf() < roughness:
 					width += randi_range(-1, 1)
