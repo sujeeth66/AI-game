@@ -1,4 +1,4 @@
-extends CharacterBody2D
+extends BaseEnemy
 
 #region Constants
 # Movement
@@ -26,7 +26,6 @@ var level: int = 1
 var health: int = BASE_HEALTH
 var max_health: int = BASE_HEALTH
 var damage: int = BASE_DAMAGE
-var is_dead: bool = false
 
 # Vision & Pathfinding
 @onready var raycast: RayCast2D = $RayCast2D
@@ -47,7 +46,7 @@ const MAX_JUMP_HEIGHT: float = 64.0  # Maximum height the slime can jump
 #endregion
 
 func _ready() -> void:
-	
+	super()
 	# Set initial stats based on level
 	scale_stats_by_level()
 	
@@ -175,6 +174,9 @@ func take_damage(amount: int) -> void:
 			state_machine.take_damage(amount)
 
 func die() -> void:
+	if is_dead:
+		return
+	super()
 	is_dead = true
 	velocity = Vector2.ZERO # Stop all movement
 	# Give experience to player
