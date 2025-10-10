@@ -25,7 +25,7 @@ func spawn_slime() -> void:
 	
 	# Set the slime's position to the spawner's position
 	new_slime.global_position = global_position
-	
+	slime_scene.linked_chest_id = "chest_1"  # Or get this from room data
 	# Add the slime to the scene
 	get_tree().current_scene.add_child(new_slime)
 	
