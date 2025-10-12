@@ -1,5 +1,6 @@
 extends CharacterBody2D
 
+class_name Player
 # ⚡ Resources
 const MAX_HEALTH := 1000.0
 const HEALTH_REGEN_RATE := 300
@@ -172,7 +173,9 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("quest_menu"):
 		global_quest_ui.show_hide_quest_log()
 				
-				
+func is_player() -> bool:
+	return true
+	
 func is_item_needed(item_name : String) -> bool:
 	# Check if the item is needed for any quest (active or not)
 	for quest in quest_manager.quests.values():
