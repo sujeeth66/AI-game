@@ -1,5 +1,6 @@
-[gd_scene load_steps=9 format=3 uid="uid://dqheofwtcot4t"]
+[gd_scene load_steps=10 format=3 uid="uid://dqheofwtcot4t"]
 
+[ext_resource type="Script" uid="uid://c708eovk8jh6w" path="res://scripts/chest.gd" id="1_rkgax"]
 [ext_resource type="Texture2D" uid="uid://dud157t7lbmwk" path="res://textures/wood_chest_sprite1.png" id="1_s2tek"]
 [ext_resource type="Texture2D" uid="uid://civrgr4a7jjoj" path="res://textures/RPG Chests.png" id="2_rkgax"]
 
@@ -42,22 +43,30 @@ animations = [{
 }]
 
 [node name="Chest" type="Area2D"]
+script = ExtResource("1_rkgax")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, 6)
+position = Vector2(0, -1)
 shape = SubResource("RectangleShape2D_psq76")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(0, -7)
 texture = ExtResource("1_s2tek")
 
 [node name="Label" type="Label" parent="."]
-offset_right = 40.0
-offset_bottom = 23.0
+visible = false
+offset_left = -20.0
+offset_top = -37.0
+offset_right = 22.0
+offset_bottom = -14.0
 text = "Open"
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, 8)
+position = Vector2(0, 1)
 sprite_frames = SubResource("SpriteFrames_matvi")
 animation = &"open"
 frame = 3
 frame_progress = 1.0
+
+[connection signal="body_entered" from="." to="." method="_on_area_2d_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_area_2d_body_exited"]

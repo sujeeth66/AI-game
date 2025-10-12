@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=4 uid="uid://dile8xc6cko2r"]
+[gd_scene load_steps=18 format=4 uid="uid://dile8xc6cko2r"]
 
 [ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/test/main.gd" id="1_ya4ey"]
 [ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_85g3d"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://cf8wf7o6vqcv7" path="res://quest system/Resources/Quest/Quest.gd" id="7_jkv2x"]
 [ext_resource type="Script" uid="uid://dwice8iy7ng3d" path="res://quest system/Resources/Quest/Objectives.gd" id="8_jbj1t"]
 [ext_resource type="Script" uid="uid://5dvtjkl50wsh" path="res://quest system/Resources/Quest/Rewards.gd" id="9_muem4"]
+[ext_resource type="Script" uid="uid://ddm3vuhrrscfk" path="res://procedural_map_generation/test/ItemSpawner.gd" id="10_choun"]
 
 [sub_resource type="Resource" id="Resource_f6ptj"]
 script = ExtResource("8_jbj1t")
@@ -87,6 +88,7 @@ script = ExtResource("1_ya4ey")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2230, 1210)
+enabled = false
 zoom = Vector2(0.25, 0.25)
 script = ExtResource("2_85g3d")
 
@@ -119,3 +121,7 @@ position = Vector2(-131, 32)
 npc_id = "npc_2"
 npc_name = "gasagasalu"
 quests = Array[ExtResource("7_jkv2x")]([SubResource("Resource_0q20i")])
+
+[node name="ItemSpawner" type="Node" parent="."]
+script = ExtResource("10_choun")
+metadata/_custom_type_script = "uid://ddm3vuhrrscfk"

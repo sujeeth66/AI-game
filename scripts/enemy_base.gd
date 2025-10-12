@@ -15,6 +15,8 @@ var is_dead: bool = false
 func _ready():
 	if enemy_id.is_empty():
 		enemy_id = "enemy_%s_%s" % [get_instance_id(), Time.get_ticks_msec()]
+	if linked_chest_id.is_empty():
+		linked_chest_id = "chest_%s" % get_instance_id()
 
 func take_damage(amount: int) -> void:
 	# Implement damage logic

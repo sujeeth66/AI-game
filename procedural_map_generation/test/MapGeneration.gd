@@ -60,7 +60,7 @@ static func compute_map_dimensions(surface_segments: Array, underground : Dictio
 		print("-------------------------",underground["room_shape"],"-------------------------")
 		buffer = 3
 	elif underground["room_shape"] == "organic":
-		buffer = 40
+		buffer = 20
 	var total_height := surface_height + (tunnel_layers * tunnel_height) + (tunnel_layers * buffer)
 	return {
 		"width": total_width,

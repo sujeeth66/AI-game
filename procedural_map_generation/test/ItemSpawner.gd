@@ -7,7 +7,50 @@ static func get_heal_amount(effect: String) -> int:
 		return int(effect.replace("heal - ", ""))
 	return 0
 
-static func spawn_items_in_rooms(room_data: Dictionary, count_per_room: int, distance_map: Dictionary, tilemap: TileMapLayer, items: Node2D, map_grid: Array, map_width: int, map_height: int) -> void:
+static func spawn_chests_in_rooms(room_data: Dictionary, distance_map: Dictionary, tilemap: TileMapLayer, items: Node2D, map_grid: Array, map_width: int, map_height: int) -> void:
+	# Preload chest scene
+	var chest_scene = preload("res://scenes/Chest.tscn")
+	
+	for room_id in room_data.keys():
+		var room = room_data[room_id]
+		var coords = room["coords"]
+		var distance = room["distance"]
+		var tier = room.get("tier", "common")
+		
+		# Find a valid spawn position using the existing function
+		var best_tile := find_flat_spawn_tile(room_id, room_data, distance_map, map_grid, map_width, map_height, tilemap)
+		if best_tile == Vector2i(-1, -1):
+			print("Room", room_id, " skipped: no valid spawn tile found for chest")
+			continue
+			
+		# Convert to world position
+		var cell_pos = Vector2i(best_tile.x, map_height - best_tile.y)
+		var world_pos = tilemap.map_to_local(cell_pos)
+		
+		# Create and configure the chest
+		var chest = chest_scene.instantiate()
+		# Set properties through the script
+		chest.set("room_tier", tier)
+		chest.set("room_distance", distance)
+		chest.position = world_pos
+		
+		# Add to scene
+		items.add_child(chest)
+		
+		# Mark the tile (optional, can be used for pathfinding or other systems)
+		var cell = tilemap.local_to_map(world_pos)
+		tilemap.set_cell( cell, 0, Vector2i(0, 9))
+		
+		print("Spawned ", tier, " chest at ", world_pos, " in room ", room_id, " (distance: ", distance, ")")
+		
+static func get_room_tier(distance: float) -> String:
+	if distance > 200:
+		return "rare"
+	elif distance > 100:
+		return "uncommon"
+	return "common"
+
+static func spawn_items_in_rooms(room_data: Dictionary, distance_map: Dictionary, tilemap: TileMapLayer, items: Node2D, map_grid: Array, map_width: int, map_height: int) -> void:
 	for room_id in room_data.keys():
 		var room = room_data[room_id]
 		var coords = room["coords"]
@@ -137,3 +180,55 @@ static func spawn_boss_reward(tilemap: TileMapLayer, items: Node2D, map_grid: Ar
 	spawn_item(quantity, item_data, spawn_pos, items)
 	
 	tilemap.set_cell(spawn_pos_tile, 0, Vector2i(0, 9))
+
+# Remove static keyword
+func spawn_chest_in_room(room_tiles: Dictionary, room_data: Dictionary, parent_node: Node) -> void:
+	if room_tiles.is_empty():
+		return
+	
+	var chest_scene = preload("res://scenes/chest.tscn")
+	var chest = chest_scene.instantiate()
+	
+	# Find a suitable position in the room
+	var floor_tiles = []
+	for pos in room_tiles:
+		if is_floor_tile(pos, parent_node):  # Check if it's a floor tile
+			floor_tiles.append(pos)
+	
+	if floor_tiles.is_empty():
+		return
+	
+	# Convert tile position to world position
+	var tile_pos = floor_tiles[randi() % floor_tiles.size()]
+	var world_pos = parent_node.map_to_world(tile_pos)
+	
+	# Position the chest
+	chest.position = world_pos
+	chest.setup_from_room(room_data)
+	
+	# Link enemies in this room to the chest
+	var enemies_in_room = get_enemies_in_room(room_tiles, parent_node)
+	for enemy in enemies_in_room:
+		if enemy.has_method("set_linked_chest"):
+			enemy.set_linked_chest(chest.chest_id)
+			chest.required_enemy_ids.append(enemy.enemy_id)
+	
+	parent_node.add_child(chest)
+
+# Helper function to check if a tile is a floor tile
+func is_floor_tile(pos: Vector2, parent_node: Node) -> bool:
+	# Adjust these based on your tile IDs
+	var floor_tile_id = 0  # Your floor tile ID
+	return parent_node.get_cell_source_id(0, pos) == floor_tile_id
+
+# Get enemies in the specified room
+func get_enemies_in_room(room_tiles: Dictionary, parent_node: Node) -> Array:
+	var enemies_in_room = []
+	var enemy_nodes = parent_node.get_tree().get_nodes_in_group("enemies")
+	
+	for enemy in enemy_nodes:
+		var enemy_tile_pos = parent_node.world_to_map(enemy.global_position)
+		if room_tiles.has(enemy_tile_pos):
+			enemies_in_room.append(enemy)
+	
+	return enemies_in_room

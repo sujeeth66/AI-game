@@ -2,6 +2,7 @@ extends Node2D
 
 @onready var tilemap := $TileMapLayer
 @onready var items : Node2D = $Items
+@onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
 
 var map_width 
 var map_height 
@@ -27,7 +28,7 @@ var level_plan = {
 	"underground": {
 		"type": "caves",
 		"tunnels": 2,
-		"room_shape": "flat"
+		"room_shape": "organic"
 	}
 }
 var city_segments = [
@@ -148,7 +149,9 @@ func _ready():
 		tilemap.set_cell(Vector2i(i,13),0,Vector2i(0,9))
 		tilemap.set_cell(Vector2i(i,14),0,Vector2i(0,9))
 	
-	ItemSpawner.spawn_items_in_rooms(rooms, 1, distance_map, tilemap, items, map_grid, map_width, map_height)
+	#ItemSpawner.spawn_items_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
+	# Spawn chests in rooms instead of individual items
+	ItemSpawner.spawn_chests_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
 	#print("Processed ",processed_rooms," rooms, skipped ",skipped_rooms," rooms")
 	#print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_valid,")")
@@ -197,7 +200,7 @@ func __ready():
 	var distance_map = distance_result["map"]
 	
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
-	ItemSpawner.spawn_items_in_rooms(rooms, 1, distance_map, tilemap, items, map_grid, map_width, map_height)
+	ItemSpawner.spawn_items_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
 	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
 	for x in range(-3, 4):
 		for y in range(-3, 4):
