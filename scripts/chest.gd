@@ -34,6 +34,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if player_in_range and Input.is_action_just_pressed("interact"):
+		print("Interact pressed on chest: ", chest_id)
 		if is_locked and remaining_enemies.size() == 0:
 			await unlock()
 		elif not is_locked and not is_opened:
@@ -73,6 +74,13 @@ func unlock() -> void:
 	update_prompt_visibility()
 
 func open() -> void:
+	print("Attempting to open chest - State: ", {
+		"is_animating": is_animating,
+		"is_locked": is_locked,
+		"is_opened": is_opened,
+		"player": "present" if Global.player else "missing"
+	})
+	
 	if is_animating or is_locked or is_opened or not Global.player:
 		return
 	
@@ -83,16 +91,21 @@ func open() -> void:
 		open_animation.play("open")
 		await open_animation.animation_finished
 	
-	emit_signal("chest_opened", self)
-	distribute_loot()
-	is_opened = true
-	is_animating = false
+	if not is_opened:  # Only distribute loot if not already opened
+		emit_signal("chest_opened", self)
+		distribute_loot()
+		is_opened = true
 	
+	is_animating = false
 	update_prompt_visibility()
 
 func distribute_loot() -> void:
 	var loot = generate_loot()
+	print("Distributing loot: ", loot)
 	for item_data in loot:
+		if not item_data:
+			print("Warning: Null item_data in loot")
+			continue
 		var item = {
 			"item_name": item_data.item_name,
 			"item_type": item_data.item_type,
@@ -100,13 +113,14 @@ func distribute_loot() -> void:
 			"item_texture": item_data.item_texture,
 			"quantity": item_data.amount
 		}
+		print("Adding item to inventory: ", item)
 		InventoryGlobal.add_item(item)
 		print("Added to inventory: ", item.item_name, " x", item.quantity)
 
 func generate_loot() -> Array:
 	var result = []
 	var available_items = get_items_for_tier(room_tier, room_distance)
-	
+	print("Available items for tier ", room_tier, " at distance ", room_distance, ": ", available_items.size())
 	# Adjust number of items based on distance
 	var item_count = 1
 	if room_distance > 100:
@@ -128,6 +142,8 @@ func generate_loot() -> Array:
 	return result
 
 func get_items_for_tier(tier: String, distance: float) -> Array:
+	print("Getting items for tier: ", tier, ", distance: ", distance)
+	print("Total items in InventoryGlobal: ", InventoryGlobal.items.size())
 	var filtered_items = []
 	var min_heal = 0
 	

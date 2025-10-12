@@ -27,7 +27,7 @@ var level_plan = {
 	},
 	"underground": {
 		"type": "caves",
-		"tunnels": 2,
+		"tunnels": 4,
 		"room_shape": "organic"
 	}
 }
