@@ -71,4 +71,9 @@
 ## Day-13(OCT 11,2025):  
 &emsp;&emsp;&emsp;09:56-start  
 &emsp;&emsp;&emsp;11:25-general maintenance  
-&emsp;&emsp;&emsp;06:34-end of day
+&emsp;&emsp;&emsp;06:34-end of day  
+
+## Day-14(OCT 12,2025):  
+&emsp;&emsp;&emsp;09:56-start  
+&emsp;&emsp;&emsp;11:25-general maintenance  
+
