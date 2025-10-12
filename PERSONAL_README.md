@@ -77,5 +77,6 @@
 &emsp;&emsp;&emsp;09:56-start  
 &emsp;&emsp;&emsp;11:25-general maintenance  
 &emsp;&emsp;&emsp;01:25-trying to creating chest sprites and animation  
+&emsp;&emsp;&emsp;05:02-implementing chest spawning logic  
 
 
