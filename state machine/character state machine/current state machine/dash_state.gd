@@ -2,9 +2,9 @@ extends CharState
 
 class_name DashState
 
-const DASH_SPEED := 800.0
-const DASH_DURATION := 0.3  # Increased for better animation visibility
-const DASH_COOLDOWN := 0.1  # Reduced cooldown
+const DASH_SPEED := 400.0
+const DASH_DURATION := 0.2
+const DASH_COOLDOWN := 0.2
 
 var dash_timer := 0.0
 var cooldown_timer := 0.0
@@ -20,39 +20,38 @@ func enter():
 	cooldown_timer = 0.0
 	is_in_cooldown = false
 	
-	# Use helper function for direction
-	var input_direction = get_movement_input()
+	# Only change direction if there's significant input
+	var input_direction = Input.get_axis("move_left", "move_right")
 	if abs(input_direction) > 0.1:
-		update_direction(input_direction)
+		direction = sign(input_direction)
+		GlobalStates.facing_right = direction > 0
+		_update_sprite_direction()
 	
-	# Force play dash animation
-	play_animation("dash", true)  # Force = true to ensure it plays
+	animated_sprite.play("dash")
 	character.velocity.x = DASH_SPEED * (1.0 if GlobalStates.facing_right else -1.0)
 
 func physics_update(delta):
 	if dash_timer > 0:
 		dash_timer -= delta
+		character.move_and_slide()
 		return
 	
-	# Start cooldown phase
-	if not is_in_cooldown:
-		is_in_cooldown = true
-		# Transition to idle state instead of changing animation
-		state_machine.change_state("idlestate")
-		return
+	# Start cooldown
+	is_in_cooldown = true
 	
 	# Cooldown before allowing state transition
 	cooldown_timer += delta
 	if cooldown_timer < DASH_COOLDOWN:
-		character.velocity.x = move_toward(character.velocity.x, 0, state_machine.FRICTION * 5)
+		character.velocity.x = move_toward(character.velocity.x, 0, 50.0)
+		character.move_and_slide()
 		return
 	
-	# Dash complete, transition to idle state
-	state_machine.change_state("idlestate")
+	# Dash complete, transition to appropriate state
+	var input_direction = Input.get_axis("move_left", "move_right")
+	if abs(input_direction) > 0.1:
+		state_machine.change_state("runstate")
+	else:
+		state_machine.change_state("idlestate")
 
 func exit():
 	animated_sprite.stop()
-
-func handle_input(event: InputEvent):
-	# Prevent other inputs during dash - this is correct for your game design
-	pass

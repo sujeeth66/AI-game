@@ -11,11 +11,6 @@ var states: Dictionary = {}
 var GRAVITY = 800
 var MAX_FALL_SPEED = 1000
 
-# Add movement constants
-const MOVEMENT_SPEED = 300.0
-const AIR_MOVEMENT_SPEED = 250.0
-const FRICTION = 100.0
-
 func _ready() -> void:
 	# Register all states
 	for child in get_children():
@@ -33,40 +28,23 @@ func _process(delta: float) -> void:
 		current_state.update(delta)
 	
 func _physics_process(delta: float) -> void:
-	# Apply gravity first
+	
+	# Apply gravity
 	if not character.is_on_floor():
 		character.velocity.y = min(character.velocity.y + GRAVITY * delta, MAX_FALL_SPEED)
-	
-	# Handle knockback (overrides all other horizontal movement)
-	var knockback_vel = GlobalStates.update_knockback(delta)
-	if GlobalStates.is_knockback_active():
-		character.velocity.x = knockback_vel
-	else:
-		# Only allow state physics updates if knockback is not active
-		if current_state:
-			current_state.physics_update(delta)
-	
-	character.move_and_slide()
+		
+	if current_state:
+		current_state.physics_update(delta)
 	
 func _input(event: InputEvent) -> void:
 	if current_state:
 		current_state.handle_input(event)
 	
-func can_transition_to(new_state: String) -> bool:
-	match new_state:
-		"dashstate":
-			return character.has_stamina(character.STAMINA_DASH_COST) and not current_state.is_in_cooldown if current_state.has_method("is_in_cooldown") else true
-		"jumpstate":
-			return character.is_on_floor()
-		"runstate":
-			return Global.can_move and not GlobalStates.is_fireball_active() and not GlobalStates.is_knockback_active()
-		_:
-			return true
-
 func change_state(new_state_name: String) -> void:
-	if not can_transition_to(new_state_name):
+	# Don't allow state changes if fireball is active
+	if GlobalStates.is_fireball_active():
 		return
-	
+		
 	if not states.has(new_state_name):
 		print("CharState not found: ", new_state_name)
 		return
@@ -76,6 +54,7 @@ func change_state(new_state_name: String) -> void:
 		current_state.exit()
 	
 	# Change state
+	#print("Changing state from %s to %s" % [current_state.name if current_state else "none", new_state_name])
 	current_state = states.get(new_state_name.to_lower())
 	
 	# Enter new state
