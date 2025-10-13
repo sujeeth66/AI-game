@@ -2,7 +2,7 @@ extends CharState
 
 class_name DashState
 
-const DASH_SPEED := 400.0
+const DASH_SPEED := 600.0
 const DASH_DURATION := 0.2
 const DASH_COOLDOWN := 0.2
 

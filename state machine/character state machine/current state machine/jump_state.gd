@@ -2,7 +2,7 @@ extends CharState
 
 class_name JumpState
 
-var JUMP_FORCE = -250  # Reduced from -1000
+var JUMP_FORCE = -350  # Reduced from -1000
 var JUMP_RELEASE_REDUCTION = 0.5  # Reduce velocity when jump is released
 
 func enter():
@@ -25,7 +25,7 @@ func physics_update(delta):
 			_update_sprite_direction()
 	
 	# Apply movement
-	character.velocity.x = direction * 100 * abs(input_direction)  # Scale by input magnitude
+	character.velocity.x = direction * 200 * abs(input_direction)  # Scale by input magnitude
 	
 	# Variable jump height - if jump button is released early, reduce upward velocity
 	if not Input.is_action_pressed("jump") and character.velocity.y < 0:

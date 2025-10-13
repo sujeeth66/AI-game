@@ -24,8 +24,10 @@ func physics_update(delta: float):
 		print(GlobalStates.is_fireball_active())
 		# Apply friction or other physics here
 		character.velocity.x = move_toward(character.velocity.x, 0, 10.0)
-		animated_sprite.play("default")
+		animated_sprite.play("knockback")
 		return
+	elif not character.is_on_floor():
+		animated_sprite.play("jump")
 	else:
 		animated_sprite.play("run")
 	
