@@ -19,11 +19,12 @@ var is_opened: bool = false
 @onready var open_animation: AnimatedSprite2D = $AnimatedSprite2D
 @onready var interaction_prompt: Label = $Label
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
+@export var item_texture : Texture
 
 func _ready() -> void:
 	if chest_id.is_empty():
 		chest_id = "chest_%s" % get_instance_id()
-	
+	closed_sprite.texture = item_texture
 	remaining_enemies = required_enemy_ids.duplicate()
 	update_visuals()
 	
@@ -43,6 +44,7 @@ func _process(delta: float) -> void:
 func setup_from_room(room_data: Dictionary) -> void:
 	room_tier = room_data.get("tier", "common")
 	room_distance = room_data.get("distance", 0.0)
+	
 
 func _connect_to_enemy(enemy: Node) -> void:
 	if enemy.has_signal("enemy_died") and not enemy.enemy_died.is_connected(_on_enemy_died):
@@ -87,8 +89,12 @@ func open() -> void:
 	is_animating = true
 	update_visuals()
 	
-	if open_animation and open_animation.sprite_frames.has_animation("open"):
-		open_animation.play("open")
+	if room_tier == "common":
+		open_animation.play("tier_1_open")
+	elif room_tier == "rare":
+		open_animation.play("tier_2_open")
+	elif room_tier == "epic":
+		open_animation.play("tier_3_open")
 		await open_animation.animation_finished
 	
 	if not is_opened:  # Only distribute loot if not already opened
@@ -144,26 +150,21 @@ func generate_loot() -> Array:
 func get_items_for_tier(tier: String, distance: float) -> Array:
 	print("Getting items for tier: ", tier, ", distance: ", distance)
 	print("Total items in InventoryGlobal: ", InventoryGlobal.items.size())
+	for item in InventoryGlobal.items:
+		print("item heals-",item.get("item_effect",""))
 	var filtered_items = []
-	var min_heal = 0
 	
-	# Adjust item quality based on distance
-	if distance > 200:
-		min_heal = 120
-	elif distance > 100:
-		min_heal = 80
 	
 	for item in InventoryGlobal.items:
 		var heal_amount = get_heal_amount(item.get("item_effect", ""))
-		if heal_amount >= min_heal:
-			if tier == "common" and heal_amount <= 100:
-				filtered_items.append(item)
-			elif tier == "uncommon" and heal_amount > 100 and heal_amount <= 200:
-				filtered_items.append(item)
-			elif tier == "rare" and heal_amount > 200:
-				filtered_items.append(item)
-			elif tier == "epic":
-				filtered_items.append(item)
+		if tier == "common" and heal_amount <= 100:
+			filtered_items.append(item)
+		elif tier == "uncommon" and heal_amount > 100 and heal_amount <= 200:
+			filtered_items.append(item)
+		elif tier == "rare" and heal_amount > 200:
+			filtered_items.append(item)
+		elif tier == "epic":
+			filtered_items.append(item)
 	
 	return filtered_items
 

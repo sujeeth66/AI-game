@@ -79,4 +79,6 @@
 &emsp;&emsp;&emsp;01:25-trying to creating chest sprites and animation  
 &emsp;&emsp;&emsp;05:02-implementing chest spawning logic  
 
-
+## Day-15(OCT 13,2025):  
+&emsp;&emsp;&emsp;at clg-implemented tiered chest logic(need to add more flair/animations)  
+&emsp;&emsp;&emsp;05:57-trying to improve player movement state machine

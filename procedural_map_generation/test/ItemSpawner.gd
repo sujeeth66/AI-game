@@ -26,9 +26,17 @@ static func spawn_chests_in_rooms(room_data: Dictionary, distance_map: Dictionar
 		# Convert to world position
 		var cell_pos = Vector2i(best_tile.x, map_height - best_tile.y)
 		var world_pos = tilemap.map_to_local(cell_pos)
-		
+		var tier_1_chest = preload("res://textures/tier_1_chest.png")
+		var tier_2_chest = preload("res://textures/tier_2_chest.png")
+		var tier_3_chest = preload("res://textures/tier_3_chest.png")
 		# Create and configure the chest
 		var chest = chest_scene.instantiate()
+		if tier == "common":
+			chest.set("item_texture",tier_1_chest)
+		elif tier == "rare":
+			chest.set("item_texture",tier_2_chest)
+		elif tier == "epic":
+			chest.set("item_texture",tier_3_chest)
 		# Set properties through the script
 		chest.set("room_tier", tier)
 		chest.set("room_distance", distance)
