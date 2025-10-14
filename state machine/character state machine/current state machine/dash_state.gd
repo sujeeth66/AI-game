@@ -2,8 +2,8 @@ extends CharState
 
 class_name DashState
 
-const DASH_SPEED := 600.0
-const DASH_DURATION := 0.2
+const DASH_SPEED := 800.0
+const DASH_DURATION := 0.3
 const DASH_COOLDOWN := 0.2
 
 var dash_timer := 0.0
@@ -42,7 +42,7 @@ func physics_update(delta):
 	# Cooldown before allowing state transition
 	cooldown_timer += delta
 	if cooldown_timer < DASH_COOLDOWN:
-		character.velocity.x = move_toward(character.velocity.x, 0, 50.0)
+		character.velocity.x = 0
 		character.move_and_slide()
 		return
 	

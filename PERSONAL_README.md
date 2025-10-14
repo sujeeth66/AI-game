@@ -82,4 +82,5 @@
 ## Day-15(OCT 13,2025):  
 &emsp;&emsp;&emsp;at clg-implemented tiered chest logic(need to add more flair/animations)  
 &emsp;&emsp;&emsp;05:57-trying to improve player movement state machine  
-&emsp;&emsp;&emsp;06:22-using backup movement logic
+&emsp;&emsp;&emsp;06:22-using backup movement logic  
+&emsp;&emsp;&emsp;08:02-end of day  

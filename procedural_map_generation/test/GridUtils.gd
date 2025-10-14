@@ -61,13 +61,11 @@ static func generate_surface_layer(
 		final_heights[x] = base_y
 
 		for y in range(base_y):
-			if (y + 85) >= 0 and (y + 85) < grid.size():
-				if x >= 0 and x < grid[y + 85].size():
-					grid[y + (height - surface_height - 1)][x] = 1
+			grid[y + (height - surface_height - 1)][x] = 1
 
 	return final_heights
 
-static func generate_city_surface(grid: Array,map_height:int, start_x: int, segment_data: Array, cutoff := 0) -> Dictionary:
+static func generate_city_surface(grid: Array,map_height:int,surface_height: int, start_x: int, segment_data: Array, cutoff := 0) -> Dictionary:
 	var final_heights := {}
 	var x_cursor = start_x
 
@@ -82,10 +80,10 @@ static func generate_city_surface(grid: Array,map_height:int, start_x: int, segm
 
 		for x in range(x_cursor, x_cursor + length):
 			final_heights[x] = segment_height
-			for y in range(map_height):
-				if (y + 85) >= 0 and (y + 85) < grid.size():
-					if x >= 0 and x < grid[y + 85].size():
-						grid[segment_height-y-56][x] = 1  # fill below surface_y
+			for y in range(segment_height):
+				#print("y:",y,",segment_height:",segment_height,",map_height:",map_height,",y + (map_height - segment_height - 1):",y + (map_height - segment_height - 1))
+				if y + (map_height - segment_height - 1) < map_height:
+					grid[y + (map_height - surface_height - 1)][x] = 1  # fill below surface_y
 
 		x_cursor += length
 

@@ -24,18 +24,13 @@ func handle_input(event: InputEvent):
 		return
 		
 	# Check for dash input
-	if Input.is_action_pressed("dash"):
+	if Input.is_action_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST):
 		state_machine.change_state("dashstate")
 		return
 
 func physics_update(delta: float):
-	
-	if Input.is_action_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST) :
-		state_machine.change_state("dashstate")
-		return
-		
 	# Apply friction or other physics here
-	character.velocity.x = move_toward(character.velocity.x, 0, 10.0)
+	character.velocity.x = move_toward(character.velocity.x, 0, 20.0)
 	character.move_and_slide()
 
 func exit():
