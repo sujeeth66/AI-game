@@ -84,3 +84,8 @@
 &emsp;&emsp;&emsp;05:57-trying to improve player movement state machine  
 &emsp;&emsp;&emsp;06:22-using backup movement logic  
 &emsp;&emsp;&emsp;08:02-end of day  
+
+## Day-16(OCT 14,2025):  
+&emsp;&emsp;&emsp;09:56-start  
+&emsp;&emsp;&emsp;11:25-general maintenance  
+&emsp;&emsp;&emsp;01:25-trying to implement new character states/gimmicks
