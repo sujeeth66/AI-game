@@ -5,13 +5,18 @@ class_name JumpState
 var JUMP_FORCE = -350  # Reduced from -1000
 var JUMP_RELEASE_REDUCTION = 0.5  # Reduce velocity when jump is released
 var wall_collided = false
+var can_wall_jump = false
+var jump_limit = 7
+var wall_jump_timer = 0
+var wall_jump_cooldown = 0.8
 
 func enter():
 	animated_sprite.play("jump")
 	_update_sprite_direction()
 	character.velocity.y = JUMP_FORCE
 	#print("jump applied")
-	
+	wall_collided = false
+	wall_jump_timer = 0
 	
 func physics_update(delta):
 	# Get input direction with deadzone
@@ -36,28 +41,38 @@ func physics_update(delta):
 	# Apply movement
 	if wall_collided:
 		character.velocity.x = 0
+		can_wall_jump = true
+		
 	else:
+		can_wall_jump = false
 		character.velocity.x = direction * 200 * abs(input_direction)  # Scale by input magnitude
 	
 	# Variable jump height - if jump button is released early, reduce upward velocity
 	if not Input.is_action_pressed("jump") and character.velocity.y < 0:
 		character.velocity.y *= JUMP_RELEASE_REDUCTION
 	
-	character.move_and_slide()
-	
 	# Only allow dashing if we have enough stamina
 	if Input.is_action_just_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST):
 		state_machine.change_state("dashstate")
 		return
+	#print(wall_jump_timer)
+	if  wall_jump_timer > wall_jump_cooldown :
+		if can_wall_jump and GlobalStates.jump_count < jump_limit and Input.is_action_pressed("jump"):
+			state_machine.change_state("jumpstate")
+			GlobalStates.jump_count += 1
+	wall_jump_timer += delta
 	
 	# Check if landed
 	if character.is_on_floor():
+		GlobalStates.jump_count = 0
 		if Input.is_action_pressed("jump"):
 			state_machine.change_state("jumpstate")
 		elif input_direction != 0:  
 			state_machine.change_state("runstate")
 		else:
 			state_machine.change_state("idlestate")
-
+	
+	character.move_and_slide()
+	
 func exit():
 	animated_sprite.stop()

@@ -88,4 +88,5 @@
 ## Day-16(OCT 14,2025):  
 &emsp;&emsp;&emsp;09:56-start  
 &emsp;&emsp;&emsp;11:25-general maintenance  
-&emsp;&emsp;&emsp;01:25-trying to implement new character states/gimmicks
+&emsp;&emsp;&emsp;01:25-trying to implement new character states/gimmicks  
+&emsp;&emsp;&emsp;07:17-trying to implement wall jump logic

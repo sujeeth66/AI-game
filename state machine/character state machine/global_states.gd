@@ -5,6 +5,7 @@ var fireball_active : bool
 var knockback_active : bool = false
 var knockback_velocity : float = 0.0
 var knockback_duration : float = 0.0
+var jump_count = 0
 
 # Function to safely set the fireball state
 func set_fireball_active(active: bool) -> void:

@@ -32,12 +32,12 @@ var level_plan = {
 	}
 }
 var city_segments = [
-	{ "type": "road", "length": 40, "height":25 },
-	{ "type": "building", "length": 40, "height":20 },
-	{ "type": "park", "length": 60, "height":25 },
-	{ "type": "building", "length": 40, "height":35 },
-	{ "type": "road", "length": 60, "height":30 },
-	{ "type": "road", "length": 60, "height":20 }
+	{ "type": "road", "length": 40, "height":45 },
+	{ "type": "building", "length": 40, "height":40 },
+	{ "type": "park", "length": 60, "height":45 },
+	{ "type": "building", "length": 40, "height":65 },
+	{ "type": "road", "length": 6, "height":40 },
+	{ "type": "road", "length": 60, "height":60 }
 ]
 
 const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
