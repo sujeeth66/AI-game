@@ -1,6 +1,3 @@
-const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
-const TunnelGen = preload("res://procedural_map_generation/test/TunnelGen.gd")
-
 static func compute_map_dimensions(surface_segments: Array, underground : Dictionary, surface_height := 50, tunnel_height := 30) -> Dictionary:
 	var total_width := 0
 	for segment in surface_segments:

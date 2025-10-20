@@ -3,6 +3,8 @@ extends Node2D
 @onready var tilemap := $TileMapLayer
 @onready var items : Node2D = $Items
 @onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
+@onready var http_request := HTTPRequest.new()
+@onready var ai_map_generator = preload("res://procedural_map_generation/test/AIMapGenerator.gd").new()
 
 var map_width 
 var map_height 
@@ -20,9 +22,9 @@ var level_plan = {
 	"surface": {
 		"type": "forest",
 		"segments": [
-			{ "type": "city", "length": 300 },
-			#{ "type": "forest", "length": 100 },
-			#{ "type": "mountains", "length": 80 }
+			{ "type": "plains", "length": 300 },
+			{ "type": "forest", "length": 100 },
+			{ "type": "mountains", "length": 80 }
 		]
 	},
 	"underground": {
@@ -35,9 +37,9 @@ var city_segments = [
 	{ "type": "road", "length": 40, "height":45 },
 	{ "type": "building", "length": 40, "height":40 },
 	{ "type": "park", "length": 60, "height":45 },
-	{ "type": "building", "length": 40, "height":65 },
-	{ "type": "road", "length": 6, "height":40 },
-	{ "type": "road", "length": 60, "height":60 }
+	{ "type": "building", "length": 40, "height":35 },
+	{ "type": "road", "length": 60, "height":40 },
+	{ "type": "road", "length": 60, "height":30 }
 ]
 
 const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
@@ -162,7 +164,15 @@ func _ready():
 		tilemap.set_cell(Vector2i(i,13),0,Vector2i(0,9))
 		tilemap.set_cell(Vector2i(i,14),0,Vector2i(0,9))
 	
-	
+func generate_level_from_lore(lore: String) -> void:
+	if not http_request.request_completed.is_connected(_on_ai_response_received):
+		http_request.request_completed.connect(_on_ai_response_received, CONNECT_ONE_SHOT)
+	ai_map_generator.generate_map_from_lore(lore, http_request)
+
+func _on_ai_response_received(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+	level_plan = ai_map_generator.parse_ai_response(result, response_code, headers, body)
+	# Now you can use level_plan with your existing map generation code
+	#_generate_map()  # Your existing map generation function
 
 func __ready():
 	tilemap.clear()
