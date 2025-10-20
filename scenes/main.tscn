@@ -1,6 +1,6 @@
 [gd_scene load_steps=18 format=4 uid="uid://dile8xc6cko2r"]
 
-[ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/test/main.gd" id="1_ya4ey"]
+[ext_resource type="Script" uid="uid://b6y3myym5ym5" path="res://scripts/main.gd" id="1_choun"]
 [ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_85g3d"]
 [ext_resource type="TileSet" uid="uid://b5w6h4x5y1w7f" path="res://textures/world.tres" id="3_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://bfbwkogkdn0jn" path="res://scenes/player.tscn" id="3_h2yge"]
@@ -82,13 +82,12 @@ rewards = Array[ExtResource("9_muem4")]([SubResource("Resource_x63s8")])
 metadata/_custom_type_script = "uid://cf8wf7o6vqcv7"
 
 [node name="Node2D" type="Node2D"]
-script = ExtResource("1_ya4ey")
+script = ExtResource("1_choun")
 
 [node name="HTTPRequest" type="HTTPRequest" parent="."]
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2230, 1210)
-enabled = false
 zoom = Vector2(0.25, 0.25)
 script = ExtResource("2_85g3d")
 

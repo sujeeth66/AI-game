@@ -90,3 +90,22 @@
 &emsp;&emsp;&emsp;11:25-general maintenance  
 &emsp;&emsp;&emsp;01:25-trying to implement new character states/gimmicks  
 &emsp;&emsp;&emsp;07:17-trying to implement wall jump logic
+
+## Day-17(OCT 15,2025):  
+&emsp;&emsp;&emsp;no work done due to college
+
+## Day-18(OCT 16,2025):  
+&emsp;&emsp;&emsp;no work done due to college
+
+## Day-19(OCT 17,2025):  
+&emsp;&emsp;&emsp;failed on the investor pitch in college
+
+## Day-20(OCT 18,2025):  
+&emsp;&emsp;&emsp;09:56-start  
+&emsp;&emsp;&emsp;11:25-general maintenance  
+
+## Day-21(OCT 19,2025):  
+&emsp;&emsp;&emsp;holiday  
+
+## Day-22(OCT 20,2025):  
+&emsp;&emsp;&emsp;11:25-start

@@ -9,6 +9,8 @@ var can_wall_jump = false
 var jump_limit = 7
 var wall_jump_timer = 0
 var wall_jump_cooldown = 0.8
+var drag_timer = 0
+var drag_cooldown = 2.0
 
 func enter():
 	animated_sprite.play("jump")
@@ -17,16 +19,27 @@ func enter():
 	#print("jump applied")
 	wall_collided = false
 	wall_jump_timer = 0
+	drag_timer = 0
+	
 	
 func physics_update(delta):
 	# Get input direction with deadzone
 	var input_direction = Input.get_axis("move_left", "move_right")
 	
+	if GlobalStates.is_wall_jumping and drag_timer < drag_cooldown:
+		GlobalStates.is_wall_jumping = false
+		
+	drag_timer += delta
+	
 	if character.is_on_wall_only():
 		wall_collided = true
+		
 	if wall_collided == true:
-		if not character.is_on_floor():
-			character.velocity = Vector2i(0,20)
+		if not character.is_on_floor() :
+			if not GlobalStates.is_wall_jumping :
+				character.velocity = Vector2i(0,20)
+			else:
+				character.velocity.x = direction * 200 * abs(input_direction)
 		else:
 			wall_collided = false
 			
@@ -39,10 +52,12 @@ func physics_update(delta):
 	GlobalStates.facing_right = direction > 0
 	_update_sprite_direction()
 	# Apply movement
-	if wall_collided:
-		character.velocity.x = 0
+	if wall_collided :
+		if not GlobalStates.is_wall_jumping:
+			character.velocity.x = 0
+		else:
+			pass
 		can_wall_jump = true
-		
 	else:
 		can_wall_jump = false
 		character.velocity.x = direction * 200 * abs(input_direction)  # Scale by input magnitude
@@ -58,8 +73,9 @@ func physics_update(delta):
 	#print(wall_jump_timer)
 	if  wall_jump_timer > wall_jump_cooldown :
 		if can_wall_jump and GlobalStates.jump_count < jump_limit and Input.is_action_pressed("jump"):
-			state_machine.change_state("jumpstate")
+			GlobalStates.is_wall_jumping = true
 			GlobalStates.jump_count += 1
+			state_machine.change_state("jumpstate")
 	wall_jump_timer += delta
 	
 	# Check if landed
