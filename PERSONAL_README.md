@@ -95,7 +95,7 @@
 &emsp;&emsp;&emsp;no work done due to college
 
 ## Day-18(OCT 16,2025):  
-&emsp;&emsp;&emsp;no work done due to college
+&emsp;&emsp;&emsp;preparing presentation for investor pitch
 
 ## Day-19(OCT 17,2025):  
 &emsp;&emsp;&emsp;failed on the investor pitch in college
