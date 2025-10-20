@@ -36,28 +36,60 @@ func generate_map_from_lore(lore: String, http_request: HTTPRequest) -> void:
 		print("✅ Request sent successfully with lore:\n'%s'" % lore)
 
 # Parses the AI response and returns a level plan
+# In AIMapGenerator.gd, add this function:
+func get_default_level_plan() -> Dictionary:
+	return {
+		"surface": {
+			"type": "forest",
+			"segments": [
+				{"type": "plains", "length": 100},
+				{"type": "forest", "length": 80}
+			]
+		},
+		"underground": {
+			"type": "caves",
+			"tunnels": 1,
+			"room_shape": "organic"
+		}
+	}
+
+# Then update parse_ai_response to use it:
 func parse_ai_response(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> Dictionary:
 	if result != HTTPRequest.RESULT_SUCCESS:
 		push_error("HTTP Request failed with code: " + str(response_code))
-		return DEFAULT_LEVEL_PLAN.duplicate(true)
+		return get_default_level_plan()
 
-	var raw_response := body.get_string_from_utf8()
-	print("\n📨 Raw server response:\n", raw_response)
-
+	var response_body = body.get_string_from_utf8()
+	print("📨 Raw server response:\n", response_body)
+	
 	var json = JSON.new()
-	var parse_error = json.parse(raw_response)
-
+	var parse_error = json.parse(response_body)
+	
 	if parse_error != OK:
 		push_error("JSON Parse Error: " + json.get_error_message())
-		return DEFAULT_LEVEL_PLAN.duplicate(true)
+		return get_default_level_plan()
 
 	var response = json.get_data()
 	if not response:
 		push_error("Empty response from AI")
-		return DEFAULT_LEVEL_PLAN.duplicate(true)
-		
-	# Validate and clean the response
-	return _validate_level_plan(response)
+		return get_default_level_plan()
+	
+	# Ensure the response has the required structure
+	if not response.has("surface") or not response.surface is Dictionary:
+		push_error("Invalid response: missing or invalid 'surface'")
+		return get_default_level_plan()
+	
+	if not response.has("underground") or not response.underground is Dictionary:
+		push_error("Invalid response: missing or invalid 'underground'")
+		return get_default_level_plan()
+	
+	# Ensure segments exist and is an array
+	if not response.surface.has("segments") or not response.surface.segments is Array:
+		push_error("Invalid response: missing or invalid 'segments' array")
+		return get_default_level_plan()
+	
+	print("Successfully parsed AI response")
+	return response
 
 # Validates and cleans the level plan from the AI
 func _validate_level_plan(plan: Dictionary) -> Dictionary:

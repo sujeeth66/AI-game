@@ -185,7 +185,7 @@ static func analyze_and_decorate_rooms(grid: Array, room_tiles: Dictionary, play
 		elif distance_ratio > 0.6:  # Next 30% farthest rooms
 			tier = "rare"
 		
-		print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_rooms,")")
+		#print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_rooms,")")
 		
 		# Update the grid
 		var tile_value = loot_tile_for(tier)

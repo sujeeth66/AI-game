@@ -3,9 +3,11 @@ extends Node2D
 @onready var tilemap := $TileMapLayer
 @onready var items : Node2D = $Items
 @onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
-@onready var http_request := HTTPRequest.new()
+@onready var http_request := $HTTPRequest
 @onready var ai_map_generator = preload("res://procedural_map_generation/test/AIMapGenerator.gd").new()
+@onready var player_scene = preload("res://scenes/player.tscn")
 
+var player = null
 var map_width 
 var map_height 
 var surface_height := 65
@@ -54,6 +56,60 @@ const MapGen = preload("res://procedural_map_generation/test/MapGeneration.gd")
 
 func _ready():
 	tilemap.clear()
+	
+	# Add the AI map generator to the scene tree
+	if not is_instance_valid(ai_map_generator):
+		ai_map_generator = preload("res://procedural_map_generation/test/AIMapGenerator.gd").new()
+	if not is_inside_tree():
+		await ready
+	add_child(ai_map_generator)
+	
+	# Add the HTTP request node if not already added
+	if not has_node("HTTPRequest"):
+		add_child(http_request)
+	
+	# Connect the signal if not already connected
+	if not http_request.request_completed.is_connected(_on_ai_response_received):
+		http_request.request_completed.connect(_on_ai_response_received)
+	
+	# Generate level from AI
+	var lore = "Generate a diverse fantasy landscape with various biomes and interesting features."
+	ai_map_generator.generate_map_from_lore(lore, http_request)
+	
+func _on_ai_response_received(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
+	print("\n=== AI Response Received ===")
+	print("Result: ", result)
+	print("Response Code: ", response_code)
+	
+	if result != HTTPRequest.RESULT_SUCCESS:
+		push_error("Request failed with error code: ", result)
+		return
+	
+	# Get the raw response for debugging
+	var response_body = body.get_string_from_utf8()
+	print("Raw response body: ", response_body)
+	
+	# Parse the response
+	var json = JSON.new()
+	var parse_error = json.parse(response_body)
+	
+	if parse_error != OK:
+		push_error("Failed to parse JSON: ", json.get_error_message())
+		return
+	
+	var response = json.get_data()
+	print("Parsed response: ", response)
+	
+	# Update level_plan with the parsed response
+	level_plan = response
+	print("Updated level_plan: ", level_plan)
+	
+	# Verify we have segments
+	if not level_plan.has("surface") or not level_plan.surface.has("segments") or level_plan.surface.segments.size() == 0:
+		push_error("Invalid level_plan format or empty segments")
+		print("Current level_plan: ", level_plan)
+		return
+	
 	var dims = MapGen.compute_map_dimensions(level_plan["surface"]["segments"], level_plan["underground"], surface_height, 30)
 	map_width = dims["width"]
 	map_height = dims["height"]
@@ -157,23 +213,17 @@ func _ready():
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
 	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
 	
-	for i in terrain_change:
-		tilemap.set_cell(Vector2i(i,10),0,Vector2i(0,9))
-		tilemap.set_cell(Vector2i(i,11),0,Vector2i(0,9))
-		tilemap.set_cell(Vector2i(i,12),0,Vector2i(0,9))
-		tilemap.set_cell(Vector2i(i,13),0,Vector2i(0,9))
-		tilemap.set_cell(Vector2i(i,14),0,Vector2i(0,9))
+	# After map generation is complete
+	var spawn_pos = find_player_spawn_position()
+	spawn_player(spawn_pos)
 	
-func generate_level_from_lore(lore: String) -> void:
-	if not http_request.request_completed.is_connected(_on_ai_response_received):
-		http_request.request_completed.connect(_on_ai_response_received, CONNECT_ONE_SHOT)
-	ai_map_generator.generate_map_from_lore(lore, http_request)
-
-func _on_ai_response_received(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
-	level_plan = ai_map_generator.parse_ai_response(result, response_code, headers, body)
-	# Now you can use level_plan with your existing map generation code
-	#_generate_map()  # Your existing map generation function
-
+	for i in terrain_change:
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+	
 func __ready():
 	tilemap.clear()
 	GridUtils.initialize_empty_grid(map_grid, map_width, map_height,surface_height)
@@ -335,3 +385,29 @@ func rooms_touch(coords_a: Array, coords_b: Array) -> bool:
 func tier_index(tier: String) -> int:
 	var tier_order = ["common", "rare", "epic"]
 	return tier_order.find(tier)
+
+func find_player_spawn_position() -> Vector2:
+	var start_x = 10  # Start a bit right of the edge
+	var surface_y = 0
+	
+	# Find the first solid block from the top at start_x
+	for y in range(0, map_height):
+		if map_grid[start_x][y] == 1:  # Assuming 1 is a solid block
+			surface_y = y - 1  # Position above the surface
+			break
+	
+	# If no surface found, use a default position
+	if surface_y <= 0:
+		surface_y = surface_height - 5  # Default position near the surface
+		
+	return Vector2(start_x * tilemap.tile_set.tile_size.x, 
+				  surface_y * tilemap.tile_set.tile_size.y)
+
+func spawn_player(position: Vector2):
+	if player_scene:
+		player = player_scene.instantiate()
+		player.position = position
+		add_child(player)
+		print("Player spawned at: ", position)
+	else:
+		push_error("Player scene not assigned!")

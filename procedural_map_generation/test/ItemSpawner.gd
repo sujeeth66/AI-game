@@ -20,7 +20,7 @@ static func spawn_chests_in_rooms(room_data: Dictionary, distance_map: Dictionar
 		# Find a valid spawn position using the existing function
 		var best_tile := find_flat_spawn_tile(room_id, room_data, distance_map, map_grid, map_width, map_height, tilemap)
 		if best_tile == Vector2i(-1, -1):
-			print("Room", room_id, " skipped: no valid spawn tile found for chest")
+			#print("Room", room_id, " skipped: no valid spawn tile found for chest")
 			continue
 			
 		# Convert to world position
@@ -67,14 +67,14 @@ static func spawn_items_in_rooms(room_data: Dictionary, distance_map: Dictionary
 
 		var best_tile := find_flat_spawn_tile(room_id, room_data, distance_map, map_grid, map_width, map_height, tilemap)
 		if best_tile.y == -1:
-			print("Room", room_id, "skipped: no valid spawn tile found")
+			#print("Room", room_id, "skipped: no valid spawn tile found")
 			continue
 		var cell_pos = Vector2i(best_tile.x, map_height - best_tile.y)
 		var world_pos = tilemap.map_to_local(cell_pos)
 		valid_cells.append(world_pos)
 
 		if valid_cells.size() == 0:
-			print("Room", room_id, "has no valid floor spawn cells")
+			#print("Room", room_id, "has no valid floor spawn cells")
 			continue
 
 		valid_cells.shuffle()
@@ -91,7 +91,7 @@ static func spawn_items_in_rooms(room_data: Dictionary, distance_map: Dictionary
 				item_pool.append(item)
 
 		if item_pool.size() == 0:
-			print("Room", room_id, "has no matching items for heal threshold", heal_threshold)
+			#print("Room", room_id, "has no matching items for heal threshold", heal_threshold)
 			continue
 
 		var item_data = item_pool[randi() % item_pool.size()]
