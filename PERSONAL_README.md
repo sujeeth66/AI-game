@@ -108,4 +108,8 @@
 &emsp;&emsp;&emsp;holiday  
 
 ## Day-22(OCT 20,2025):  
-&emsp;&emsp;&emsp;11:25-start
+&emsp;&emsp;&emsp;college  
+
+## Day-23(OCT 21,2025):  
+&emsp;&emsp;&emsp;Researching RAG models and its implementation  
+&emsp;&emsp;&emsp;08:02-end of day  
