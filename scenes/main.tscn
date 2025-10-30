@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=4 uid="uid://dile8xc6cko2r"]
+[gd_scene load_steps=20 format=4 uid="uid://dile8xc6cko2r"]
 
 [ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/test/main.gd" id="1_choun"]
 [ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_85g3d"]
@@ -10,6 +10,8 @@
 [ext_resource type="Script" uid="uid://dwice8iy7ng3d" path="res://quest system/Resources/Quest/Objectives.gd" id="8_jbj1t"]
 [ext_resource type="Script" uid="uid://5dvtjkl50wsh" path="res://quest system/Resources/Quest/Rewards.gd" id="9_muem4"]
 [ext_resource type="Script" uid="uid://ddm3vuhrrscfk" path="res://procedural_map_generation/test/ItemSpawner.gd" id="10_choun"]
+[ext_resource type="Script" uid="uid://dg72emo61j37b" path="res://AI_functions/demo.gd" id="11_ya4ey"]
+[ext_resource type="Script" uid="uid://cisjig02lh1rw" path="res://AI_functions/npc_factory.gd" id="12_eb6dy"]
 
 [sub_resource type="Resource" id="Resource_f6ptj"]
 script = ExtResource("8_jbj1t")
@@ -124,3 +126,9 @@ quests = Array[ExtResource("7_jkv2x")]([SubResource("Resource_0q20i")])
 [node name="ItemSpawner" type="Node" parent="."]
 script = ExtResource("10_choun")
 metadata/_custom_type_script = "uid://ddm3vuhrrscfk"
+
+[node name="demo" type="Node" parent="."]
+script = ExtResource("11_ya4ey")
+
+[node name="NPCfactory" type="Node" parent="."]
+script = ExtResource("12_eb6dy")

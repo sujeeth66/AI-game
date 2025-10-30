@@ -13,9 +13,6 @@ const SPAWN_CHANCE = 0.15  # 15% chance to spawn a slime in a valid position
 
 @onready var terrain_tilemap := $TileMapLayer
 @onready var decor_tilemap := $DecorLayer
-@onready var chunk_builder1 := preload("res://scripts/terrain_chunks.gd").new()
-@onready var chunk_builder2 := preload("res://scripts/special_chunks.gd").new()
-@onready var arena_builder := preload("res://scripts/boss_arena_chunk.gd").new()
 @onready var http_request := $HTTPRequest
 
 const ENDPOINT := "http://127.0.0.1:8000/generate-map"

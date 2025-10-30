@@ -54,6 +54,8 @@ const RoomAnalyzer = preload("res://procedural_map_generation/test/RoomAnalyzer.
 const ItemSpawner = preload("res://procedural_map_generation/test/ItemSpawner.gd")
 const MapGen = preload("res://procedural_map_generation/test/MapGeneration.gd")
 
+signal map_generation_finished
+
 func _ready():
 	tilemap.clear()
 	
@@ -113,6 +115,7 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 	var dims = MapGen.compute_map_dimensions(level_plan["surface"]["segments"], level_plan["underground"], surface_height, 30)
 	map_width = dims["width"]
 	map_height = dims["height"]
+	Global.map_height = map_height
 	print("map width and height: ",map_width,",",map_height)
 	GridUtils.initialize_empty_grid(map_grid, map_width, map_height,surface_height)
 	var x_cursor = 0
@@ -223,6 +226,21 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
 		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
 		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		
+	# Build global surface_tiles array
+	for x in range(map_width):
+		var found = false
+		for y in range(map_height-5,0,-1):
+			if map_grid[y][x] == 1: # Assuming 1 means ground/top surface
+				Global.surface_tiles.append(Vector2i(x, map_height - y - 1))
+				found = true
+				break
+		if not found:
+			Global.surface_tiles.append(Vector2i(x, -1))  # or skip or null as preferred
+	print("[main.gd] surface_tiles array generated, sample:", Global.surface_tiles.slice(0,10))
+	
+	print("[main.gd] Emitting map_generation_finished!")
+	emit_signal("map_generation_finished")
 	
 func __ready():
 	tilemap.clear()
