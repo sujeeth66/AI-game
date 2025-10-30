@@ -758,7 +758,6 @@ text = "inventory
 [node name="InventoryUi" parent="inventory_ui/ColorRect" instance=ExtResource("20_60mlk")]
 
 [node name="InventoryHotbar" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Hotbar" parent="InventoryHotbar" instance=ExtResource("21_i4ail")]
 
