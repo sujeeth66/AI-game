@@ -103,6 +103,13 @@ static func spawn_slimes_around_chest(chest_tile: Vector2i, tier: String, room_c
 		if slime.has_method("set_level"):
 			slime.set_level(slime_level)
 		
+		# Configure item drops
+		if "drop_item_name" in slime:
+			slime.drop_item_name = "Slime Gel"
+			slime.drop_chance = 0.8  # 80% drop rate
+			slime.drop_quantity_min = 1
+			slime.drop_quantity_max = 2
+		
 		parent.add_child(slime)
 		slimes_spawned += 1
 	

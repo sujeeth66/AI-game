@@ -110,6 +110,36 @@ def generate_npc():
     }
     return jsonify(response)
 
+@app.route("/generate-item", methods=["POST"])
+def generate_item():
+    """Generate item data for quest objectives"""
+    print("\n=== /generate-item endpoint called ===")
+    print(f"Request headers: {dict(request.headers)}")
+    print(f"Request data: {request.get_data(as_text=True)}")
+    
+    try:
+        data = request.get_json(force=True)
+        print(f"Parsed JSON: {data}")
+    except Exception as e:
+        print(f"Error parsing JSON: {e}")
+        data = {}
+    
+    item_name = data.get("item_name", "Unknown Item") if data else "Unknown Item"
+    context = data.get("context", "") if data else ""
+    
+    # Placeholder item data - could use AI to generate creative items
+    response = {
+        "item_name": "Slime Gel",
+        "item_type": "quest_item",
+        "item_effect": "none",
+        "item_texture_path": "res://textures/slime_gel.png",
+        "spawn_count": 5,  # Number to spawn on map
+        "drop_rate": 0.8,  # 80% chance to drop from slimes
+        "description": "A sticky gel extracted from slimes. Used in various alchemical recipes."
+    }
+    print(f"Returning response: {response}")
+    return jsonify(response)
+
 @app.route("/place-npc", methods=["POST"])
 def place_npc():
     """Determine NPC placement position based on map data"""
@@ -150,6 +180,7 @@ if __name__ == "__main__":
     print("  - POST /generate-map")
     print("  - POST /generate-quest")
     print("  - POST /generate-npc")
+    print("  - POST /generate-item")
     print("  - POST /place-npc")
     app.run(host="127.0.0.1", port=8000, debug=True)
 

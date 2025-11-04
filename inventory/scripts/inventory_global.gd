@@ -25,10 +25,38 @@ func _ready() -> void:
 	call_deferred("setup_global_variables")
 	
 func setup_global_variables():
-	player = Global.player
-	quest_manager = Global.global_quest_manager
+	_refresh_references()
+
+func _refresh_references():
+	if player == null or not is_instance_valid(player):
+		if "player" in Global:
+			player = Global.player
+	if quest_manager == null or not is_instance_valid(quest_manager):
+		if "global_quest_manager" in Global:
+			quest_manager = Global.global_quest_manager
+		if quest_manager == null and player != null:
+			if player.has_node("QuestManager"):
+				quest_manager = player.get_node("QuestManager")
+
+func _update_quest_progress_for_item(item_name: String, quantity: int) -> void:
+	_refresh_references()
+	if quest_manager == null:
+		push_warning("[InventoryGlobal] Quest manager not ready; quest progress not updated for " + item_name)
+		return
+	if player == null:
+		push_warning("[InventoryGlobal] Player reference missing; quest tracker not refreshed")
+		return
+	for quest in quest_manager.get_active_quests():
+		for objective in quest.objectives:
+			if objective.objective_type == "collection" and objective.target_name == item_name:
+				quest.update_objective(quest.quest_id, objective.id, quantity)
+				player.update_quest_tracker()
+				if quest.is_completed():
+					quest_manager.update_quest(quest.quest_id, "completed")
 
 func add_item(item,to_hotbar = false):
+	_refresh_references()
+
 	var added_to_hotbar = false
 	if to_hotbar:
 		added_to_hotbar = add_item_to_hotbar(item)
@@ -38,27 +66,15 @@ func add_item(item,to_hotbar = false):
 			if inventory[i] != null and inventory[i]["item_name"] == item["item_name"]:
 				inventory[i]["quantity"] += item["quantity"]
 				print("from add_item")
-				for quest in quest_manager.get_active_quests():
-					for objective in quest.objectives:
-						if objective.objective_type == "collection" and objective.target_name == item["item_name"] :
-							quest.update_objective(quest.quest_id,objective.id, item["quantity"])
-							player.update_quest_tracker()
-							if quest.is_completed():
-								quest_manager.update_quest(quest.quest_id, "completed")
 				inventory_updated.emit()
+				_update_quest_progress_for_item(item["item_name"], item["quantity"])
 				#print("item added ",inventory)
 				return true
 			elif inventory[i] == null:
-				inventory[i] = item
+				inventory[i] = item.duplicate(true)
 				print("from add_item")
-				for quest in quest_manager.get_active_quests():
-					for objective in quest.objectives:
-						if objective.objective_type == "collection" and objective.target_name == item["item_name"] :
-							quest.update_objective(quest.quest_id,objective.id, item["quantity"])
-							player.update_quest_tracker()
-							if quest.is_completed():
-								quest_manager.update_quest(quest.quest_id, "completed")
 				inventory_updated.emit()
+				_update_quest_progress_for_item(item["item_name"], item["quantity"])
 				#print("item added ",inventory)
 				return true
 		return false

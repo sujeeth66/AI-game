@@ -17,6 +17,12 @@ extends BaseEnemy
 @export var BASE_DAMAGE: int = 20
 @export var EXPERIENCE_REWARD: int = 15
 
+# Item Drops
+@export var drop_item_name: String = "Slime Gel"
+@export var drop_chance: float = 0.8  # 80% chance to drop
+@export var drop_quantity_min: int = 1
+@export var drop_quantity_max: int = 2
+
 #region Variables
 # State Machine
 @onready var state_machine = $SlimeStateMachine
@@ -179,14 +185,70 @@ func die() -> void:
 	super()
 	is_dead = true
 	velocity = Vector2.ZERO # Stop all movement
+	
 	# Give experience to player
 	var player = get_tree().get_first_node_in_group("player")
 	if player and is_instance_valid(player) and player.has_method("gain_experience"):
 		player.gain_experience(EXPERIENCE_REWARD)
 	
+	# Drop items
+	drop_items()
+	
 	# Let the death state handle the rest
 	if state_machine:
 		state_machine.change_state("slimedeathstate")
+
+func drop_items() -> void:
+	# Check if we should drop an item based on drop_chance
+	if randf() > drop_chance:
+		return
+	
+	# Find the item in InventoryGlobal
+	var item_data = null
+	for item in InventoryGlobal.items:
+		if item.get("item_name") == drop_item_name:
+			item_data = item
+			break
+	
+	if not item_data:
+		if debug_mode:
+			print("[Slime] ⚠️ Item '", drop_item_name, "' not found in InventoryGlobal.items")
+		return
+	
+	# Determine drop quantity
+	var quantity = randi_range(drop_quantity_min, drop_quantity_max)
+	
+	# Spawn the item at death location
+	var item_scene = load("res://inventory/scenes/game_item.tscn")
+	if not item_scene:
+		if debug_mode:
+			print("[Slime] ⚠️ Failed to load game_item scene")
+		return
+	
+	var item_instance = item_scene.instantiate()
+	item_instance.initiate_items(
+		quantity,
+		item_data.get("item_name"),
+		item_data.get("item_type"),
+		item_data.get("item_effect"),
+		item_data.get("item_texture")
+	)
+	
+	# Position slightly above where the slime died
+	item_instance.global_position = global_position + Vector2(0, -10)
+	
+	# Add to scene
+	var root = get_tree().current_scene
+	var items_node = root.get_node_or_null("Items")
+	if not items_node:
+		items_node = Node2D.new()
+		items_node.name = "Items"
+		root.add_child(items_node)
+	
+	items_node.add_child(item_instance)
+	
+	if debug_mode:
+		print("[Slime] Dropped ", quantity, "x ", drop_item_name)
 
 func set_level(new_level: int) -> void:
 	level = new_level
