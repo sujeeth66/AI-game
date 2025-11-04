@@ -85,8 +85,8 @@ func _physics_process(delta: float) -> void:
 	if int(total_time) % 3 == 0 and int(total_time - delta) % 3 != 0:
 		if has_line_of_sight:
 			print("Player detected! Distance: ", distance_to_player)
-		else:
-			print("lost line of sight")
+		#else:
+			#print("lost line of sight")
 	# Update vision and LOS
 	update_vision(delta)
 
