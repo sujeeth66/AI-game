@@ -8,8 +8,9 @@ static func get_heal_amount(effect: String) -> int:
 	return 0
 
 static func spawn_chests_in_rooms(room_data: Dictionary, distance_map: Dictionary, tilemap: TileMapLayer, items: Node2D, map_grid: Array, map_width: int, map_height: int) -> void:
-	# Preload chest scene
+	# Preload chest and slime scenes
 	var chest_scene = preload("res://scenes/Chest.tscn")
+	var slime_scene = preload("res://scenes/slime.tscn")
 	
 	for room_id in room_data.keys():
 		var room = room_data[room_id]
@@ -49,6 +50,9 @@ static func spawn_chests_in_rooms(room_data: Dictionary, distance_map: Dictionar
 		var cell = tilemap.local_to_map(world_pos)
 		tilemap.set_cell( cell, 0, Vector2i(0, 9))
 		
+		# Spawn 5 slimes around the chest
+		spawn_slimes_around_chest(best_tile, tier, coords, map_grid, map_width, map_height, tilemap, items, slime_scene)
+		
 		#print("Spawned ", tier, " chest at ", world_pos, " in room ", room_id, " (distance: ", distance, ")")
 		
 static func get_room_tier(distance: float) -> String:
@@ -57,6 +61,92 @@ static func get_room_tier(distance: float) -> String:
 	elif distance > 100:
 		return "uncommon"
 	return "common"
+
+static func get_slime_level_for_tier(tier: String) -> int:
+	# Map chest tier to slime level
+	match tier:
+		"common":
+			return 1
+		"rare":
+			return randi_range(2, 3)  # Rare chests get level 2-3 slimes
+		"epic":
+			return randi_range(4, 5)  # Epic chests get level 4-5 slimes
+		_:
+			return 1
+
+static func spawn_slimes_around_chest(chest_tile: Vector2i, tier: String, room_coords: Array, map_grid: Array, map_width: int, map_height: int, tilemap: TileMapLayer, parent: Node2D, slime_scene: PackedScene) -> void:
+	if not slime_scene:
+		print("⚠️ Slime scene is null, cannot spawn slimes")
+		return
+	
+	var slimes_to_spawn = 5
+	var slimes_spawned = 0
+	var slime_level = get_slime_level_for_tier(tier)
+	
+	# Find valid spawn positions around the chest within the room
+	var valid_positions = find_valid_slime_positions_in_room(chest_tile, room_coords, map_grid, map_width, map_height, slimes_to_spawn)
+	
+	for tile_pos in valid_positions:
+		if slimes_spawned >= slimes_to_spawn:
+			break
+		
+		# Convert tile position to world position
+		var cell_pos = Vector2i(tile_pos.x, map_height - tile_pos.y)
+		var world_pos = tilemap.map_to_local(cell_pos) + Vector2(8, -24)  # Adjust for slime size
+		
+		# Instantiate and configure slime
+		var slime = slime_scene.instantiate()
+		slime.position = world_pos
+		slime.debug_mode = false
+		
+		# Set level based on chest tier
+		if slime.has_method("set_level"):
+			slime.set_level(slime_level)
+		
+		parent.add_child(slime)
+		slimes_spawned += 1
+	
+	if slimes_spawned > 0:
+		print("Spawned ", slimes_spawned, " level ", slime_level, " slimes around ", tier, " chest")
+
+static func find_valid_slime_positions_in_room(center_tile: Vector2i, room_coords: Array, map_grid: Array, map_width: int, map_height: int, max_positions: int) -> Array[Vector2i]:
+	var valid_positions: Array[Vector2i] = []
+	var search_radius = 10  # Search within 10 tiles of the chest
+	
+	# Convert room_coords to a set for faster lookup
+	var room_tiles_set = {}
+	for coord in room_coords:
+		var key = str(coord.x) + "," + str(coord.y)
+		room_tiles_set[key] = true
+	
+	# Search in a spiral pattern around the chest
+	for radius in range(3, search_radius + 1):
+		for angle in range(0, 360, 30):  # Check every 30 degrees
+			var rad = deg_to_rad(angle)
+			var offset_x = int(cos(rad) * radius)
+			var offset_y = int(sin(rad) * radius)
+			var check_tile = Vector2i(center_tile.x + offset_x, center_tile.y + offset_y)
+			
+			# Check if tile is in room and valid for spawning
+			var key = str(check_tile.x) + "," + str(check_tile.y)
+			if room_tiles_set.has(key) and is_valid_slime_spawn_tile(check_tile, map_grid, map_width, map_height):
+				valid_positions.append(check_tile)
+				if valid_positions.size() >= max_positions:
+					return valid_positions
+	
+	return valid_positions
+
+static func is_valid_slime_spawn_tile(tile: Vector2i, map_grid: Array, map_width: int, map_height: int) -> bool:
+	# Check bounds
+	if tile.x < 1 or tile.x >= map_width - 1 or tile.y < 2 or tile.y >= map_height - 1:
+		return false
+	
+	# Check if there's solid ground below and empty space above (2 tiles for slime height)
+	if map_grid[tile.y - 1][tile.x] == 1:  # Solid ground below
+		if map_grid[tile.y][tile.x] in [4, 5, 6] and map_grid[tile.y + 1][tile.x] in [4, 5, 6]:  # Empty space above
+			return true
+	
+	return false
 
 static func spawn_items_in_rooms(room_data: Dictionary, distance_map: Dictionary, tilemap: TileMapLayer, items: Node2D, map_grid: Array, map_width: int, map_height: int) -> void:
 	for room_id in room_data.keys():
