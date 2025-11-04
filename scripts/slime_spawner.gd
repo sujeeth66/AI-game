@@ -34,4 +34,4 @@ func spawn_slime() -> void:
 	await get_tree().create_timer(spawn_cooldown).timeout
 	can_spawn = true
 	
-	print("Spawned new slime at position: ", global_position)
+	#print("Spawned new slime at position: ", global_position)

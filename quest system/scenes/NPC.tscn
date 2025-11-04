@@ -90,6 +90,7 @@ dialog_resource = SubResource("Resource_ukla7")
 quests = Array[ExtResource("3_j7185")]([SubResource("Resource_hbh4p")])
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+scale = Vector2(2, 2)
 sprite_frames = SubResource("SpriteFrames_ax5s6")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

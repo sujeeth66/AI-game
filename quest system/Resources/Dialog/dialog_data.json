@@ -183,12 +183,12 @@
 		"name": "Alchemist",
 		"trees": [
 			{
-				"branch_name": "intro",
+				"branch_id": "npc_default",
 				"dialogs": [
 					{
 						"options": {
 							"No": "exit",
-							"Sure": "offer_quest"
+							"Sure": "offer_quests"
 						},
 						"state": "start",
 						"text": "Greetings! Care to help the alchemist?"
@@ -197,7 +197,7 @@
 						"options": {
 							"Okay": "exit"
 						},
-						"state": "offer_quest",
+						"state": "offer_quests",
 						"text": "Bring me 3 Slime Gels."
 					}
 				]

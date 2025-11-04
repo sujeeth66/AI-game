@@ -49,7 +49,7 @@ static func spawn_chests_in_rooms(room_data: Dictionary, distance_map: Dictionar
 		var cell = tilemap.local_to_map(world_pos)
 		tilemap.set_cell( cell, 0, Vector2i(0, 9))
 		
-		print("Spawned ", tier, " chest at ", world_pos, " in room ", room_id, " (distance: ", distance, ")")
+		#print("Spawned ", tier, " chest at ", world_pos, " in room ", room_id, " (distance: ", distance, ")")
 		
 static func get_room_tier(distance: float) -> String:
 	if distance > 200:

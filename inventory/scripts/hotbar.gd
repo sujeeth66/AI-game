@@ -7,6 +7,7 @@ var dragged_slot = null
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	InventoryGlobal.inventory_updated.connect(update_hotbar_ui)
+	hotbar_container.visible = false
 	update_hotbar_ui()
 	
 func update_hotbar_ui():

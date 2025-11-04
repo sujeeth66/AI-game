@@ -51,6 +51,7 @@ func _ready() -> void:
 	update_quest_tracker()
 	update_coins(110)
 	global_quest_ui = Global.global_quest_ui
+	inventory_hotbar.visible = false
 	add_to_group("player")
 	selected_quest = global_quest_ui.selected_quest
 	print("selected_quest------------player ready",selected_quest.quest_id if selected_quest else 0)

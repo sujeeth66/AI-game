@@ -41,9 +41,9 @@ func _on_map_ready():
 	print("[demo.gd] Created demo quest:", demo_quest)
 
 	# Build dialog
-	var intro_tree = npcf.build_dialog_tree("intro", [
-		npcf.build_dialog_entry("start", "Greetings! Care to help the alchemist?", {"Sure": "offer_quest", "No": "exit"}),
-		npcf.build_dialog_entry("offer_quest", "Bring me 3 Slime Gels.", {"Okay": "exit"})
+	var intro_tree = npcf.build_dialog_tree("npc_default", [
+		npcf.build_dialog_entry("start", "Greetings! Care to help the alchemist?", {"Sure": "offer_quests", "No": "exit"}),
+		npcf.build_dialog_entry("offer_quests", "Bring me 3 Slime Gels.", {"Okay": "exit"})
 	])
 	print("[demo.gd] Built demo dialog tree.")
 
@@ -74,7 +74,7 @@ func _on_map_ready():
 	var map_height = Global.map_height
 	
 	if npc and tilemap != null and map_height != null:
-		var surf_x = 20  # demo column, can be randomized or set per need
+		var surf_x = 200  # demo column, can be randomized or set per need
 		var ok = npcf.place_npc_on_surface_tile_with_surface_array(npc, surf_x, map_height, tilemap)
 		if ok:
 			print("[demo.gd] NPC placed on surface_tiles at x=", surf_x)

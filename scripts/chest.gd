@@ -174,10 +174,10 @@ func get_heal_amount(effect: String) -> int:
 	return 0
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
-	print("player entered")
+	#print("player entered")
 	if body.is_in_group("player"):
 		player_in_range = true
-		print("player entered")
+		#print("player entered")
 		update_prompt_visibility()
 
 func _on_area_2d_body_exited(body: Node2D) -> void:

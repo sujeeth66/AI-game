@@ -115,7 +115,7 @@ func _spawn_player(position: Vector2) -> void:
 		print("Camera position: ", active_camera.global_position)
 		print("Camera zoom: ", active_camera.zoom)
 	print("--- END DEBUG ---")
-	print("✅ Player spawned successfully at: ", position)
+	#print("✅ Player spawned successfully at: ", position)
 
 func _log_chunk_build_time(start_time: float, chunk_type: String) -> void:
 	var current_time = Time.get_ticks_usec()
@@ -243,9 +243,9 @@ func spawn_slimes(surface_positions: Array, player_spawn_position: Vector2) -> v
 		add_child(slime)
 		last_slime_x = tile_pos.x
 		slimes_spawned += 1
-		print("Spawned slime at ", world_pos, " (level ", enemy_level, ")")
+		#print("Spawned slime at ", world_pos, " (level ", enemy_level, ")")
 	
-	print("Spawned ", slimes_spawned, " slimes in this chunk")
+	#print("Spawned ", slimes_spawned, " slimes in this chunk")
 
 func calculate_enemy_level(distance: int) -> int:
 	"""

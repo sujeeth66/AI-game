@@ -97,10 +97,10 @@ func upsert_npc_dialog_in_json(npc_id: String, npc_name: String, dialog_trees: A
 
 ## Convenience: build a simple dialog tree structure
 ## Example result to pass as a tree:
-## { "branch_name": "intro", "dialogs": [ {"state": "start", "text": "Hello", "options": {"Bye": "exit"}} ] }
+## { "branch_id": "intro", "dialogs": [ {"state": "start", "text": "Hello", "options": {"Bye": "exit"}} ] }
 func build_dialog_tree(branch_name: String, dialogs: Array) -> Dictionary:
 	return {
-		"branch_name": branch_name,
+		"branch_id": branch_name,
 		"dialogs": dialogs
 	}
 
@@ -118,54 +118,6 @@ func build_dialog_entry(state: String, text: String, options: Dictionary) -> Dic
 
 # --- Placement utilities ---
 # All now explicitly require tilemap argument!
-
-## Place NPC on surface using a precomputed array of surface tile positions (Array[Vector2i]).
-## - origin_x: reference tile X (e.g., player tile x)
-## - distance: desired horizontal tile distance from origin
-## - tile_size: world pixels per tile
-## - tilemap: TileMap node for conversion
-func place_npc_on_surface_from_tiles(npc: Node2D, surface_tiles: Array, origin_x: int, distance: int, tile_size: int, tilemap) -> bool:
-	print("[DEBUG] place_npc_on_surface_from_tiles CALLED, tilemap:", tilemap)
-	if not npc or surface_tiles.is_empty() or not tilemap:
-		print("[DEBUG] NPC placement failed: npc valid? ", npc != null, ", surface_tiles empty? ", surface_tiles.is_empty(), ", tilemap valid? ", tilemap != null)
-		return false
-	var target_x := origin_x + distance
-	var best := _find_closest_by_x(surface_tiles, target_x)
-	if best == null:
-		print("[DEBUG] place_npc_on_surface_from_tiles: No surface tile found for target_x=", target_x)
-		return false
-	# Convert grid tile to map (cell) pos for world conversion
-	var cell_pos = Vector2i(best.x, tilemap.get_parent().map_height - best.y)
-	var world_pos = tilemap.map_to_local(cell_pos)
-	npc.position = world_pos
-	print("[DEBUG] Placed NPC at tile (", best.x, ",", best.y, ") map cell = ", cell_pos, " position = ", npc.position)
-	return true
-
-## Place NPC on surface computed from a 0/1 grid (1 = solid/ground, 0 = air), using top-most solid per column.
-## - grid: Array[Array[int]] shaped [height][width] or [y][x] as used in test grid utils
-## - map_height: total rows
-## - origin_x: reference tile x
-## - distance: desired horizontal offset
-## - tile_size: pixels per tile
-## - tilemap: TileMap node for coordinate conversion
-func place_npc_on_surface_from_grid(npc: Node2D, grid: Array, map_height: int, origin_x: int, distance: int, tile_size: int, tilemap) -> bool:
-	print("[DEBUG] place_npc_on_surface_from_grid CALLED, tilemap:", tilemap)
-	if not npc or grid.is_empty() or not tilemap:
-		print("[DEBUG] NPC grid placement failed: npc valid? ", npc != null, ", grid empty? ", grid.is_empty(), ", tilemap valid? ", tilemap != null)
-		return false
-	var width = grid[0].size()
-	var surface := _compute_surface_from_grid(grid, width, map_height)
-	print("[DEBUG] Computing surface from grid for NPC placement. surface tiles count:", surface.size())
-	return place_npc_on_surface_from_tiles(npc, surface, origin_x, distance, tile_size, tilemap)
-
-## Convenience: place relative to player if available (and tilemap).
-func place_npc_near_player_on_tiles(npc: Node2D, surface_tiles: Array, distance: int, tile_size: int, tilemap) -> bool:
-	print("[DEBUG] place_npc_near_player_on_tiles CALLED, tilemap:", tilemap)
-	var origin_x := 0
-	if Global and Global.player:
-		origin_x = int(floor(Global.player.position.x / max(1, tile_size)))
-	return place_npc_on_surface_from_tiles(npc, surface_tiles, origin_x, distance, tile_size, tilemap)
-
 ## Place NPC at visual ground using global surface_tiles array.
 ## surf_x = desired column; map_height = map tile height; tilemap = map TileMap node.
 func place_npc_on_surface_tile_with_surface_array(npc: Node2D, surf_x: int, map_height: int, tilemap) -> bool:
@@ -173,7 +125,7 @@ func place_npc_on_surface_tile_with_surface_array(npc: Node2D, surf_x: int, map_
 	print("[npc_factory] Placing NPC at surf_x=", surf_x, ", map_height=", map_height, ", tilemap=", tilemap)
 	if surf_x >= 0 and surf_x < surface_tiles.size() and tilemap and surface_tiles[surf_x].y != -1:
 		var surf_pos = surface_tiles[surf_x] # Vector2i(x, y)
-		var cell_pos = Vector2i(surf_pos.x, surf_pos.y )
+		var cell_pos = Vector2i(surf_pos.x, surf_pos.y - 1 )
 		var world_pos = tilemap.map_to_local(cell_pos)
 		npc.position = world_pos
 		print("[npc_factory] NPC placed at surface tile:", surf_pos, " cell_pos:", cell_pos, " world_pos:", world_pos)
