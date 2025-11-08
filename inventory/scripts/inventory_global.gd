@@ -46,38 +46,52 @@ func _update_quest_progress_for_item(item_name: String, quantity: int) -> void:
 	if player == null:
 		push_warning("[InventoryGlobal] Player reference missing; quest tracker not refreshed")
 		return
+	
+	var normalized_item_name = item_name#.strip_edges().to_lower()
+	print("[DEBUG] Checking quest progress for item: ", item_name, " (normalized: ", normalized_item_name, ")")
+	print("[DEBUG] quest_manager.get_active_quests() = ",quest_manager.get_active_quests())
+	
 	for quest in quest_manager.get_active_quests():
+		print("[DEBUG] Checking quest: ", quest.quest_name)
 		for objective in quest.objectives:
-			if objective.objective_type == "collection" and objective.target_name == item_name:
+			if objective.objective_type != "collection":
+				continue
+				
+			var objective_name = objective.target_name#.strip_edges().to_lower()
+			print("[DEBUG] - Objective: ", objective_name, " == ", normalized_item_name, "?")
+			
+			if objective_name == normalized_item_name:
+				print("[SUCCESS] Found matching objective! Updating quest progress")
 				quest.update_objective(quest.quest_id, objective.id, quantity)
 				player.update_quest_tracker()
 				if quest.is_completed():
 					quest_manager.update_quest(quest.quest_id, "completed")
+				return
+			else:
+				print("[FAILURE]Did Not Find matching objective! Updating quest progress")
 
-func add_item(item,to_hotbar = false):
+func add_item(item, to_hotbar = false):
 	_refresh_references()
 
 	var added_to_hotbar = false
 	if to_hotbar:
 		added_to_hotbar = add_item_to_hotbar(item)
-		#inventory_updated.emit()
+	
 	if not added_to_hotbar:
 		for i in range(inventory.size()):
 			if inventory[i] != null and inventory[i]["item_name"] == item["item_name"]:
 				inventory[i]["quantity"] += item["quantity"]
-				print("from add_item")
+				print("[DEBUG] Added to existing stack: ", item["item_name"])
 				inventory_updated.emit()
 				_update_quest_progress_for_item(item["item_name"], item["quantity"])
-				#print("item added ",inventory)
 				return true
 			elif inventory[i] == null:
 				inventory[i] = item.duplicate(true)
-				print("from add_item")
+				print("[DEBUG] Added new item: ", item["item_name"])
 				inventory_updated.emit()
 				_update_quest_progress_for_item(item["item_name"], item["quantity"])
-				#print("item added ",inventory)
 				return true
-		return false
+	return false
 	
 func remove_item(item_name):
 	for i in range(inventory.size()):

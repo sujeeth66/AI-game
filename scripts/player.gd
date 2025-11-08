@@ -63,6 +63,9 @@ func _ready() -> void:
 	if stamina_bar:
 		stamina_bar.init_stamina(MAX_STAMINA)
 
+#func _process(delta: float) -> void:
+	#quest_manager.get_active_quests()
+
 func _physics_process(delta: float) -> void:
 	if _handle_respawn(delta):
 		return
@@ -174,21 +177,6 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("quest_menu"):
 		global_quest_ui.show_hide_quest_log()
 				
-func is_player() -> bool:
-	return true
-	
-func is_item_needed(item_name : String) -> bool:
-	# Check if the item is needed for any quest (active or not)
-	for quest in quest_manager.quests.values():
-		# Skip completed quests
-		if quest.state == "completed":
-			continue
-			
-		for objective in quest.objectives:
-			if objective.objective_type == "collection" and objective.target_name == item_name and objective.collected_quantity < objective.required_quantity:
-				return true
-	return false
-	
 # In player.gd
 func check_quest_objectives(target_name: String, objective_type: String, quantity: int = 1):
 	print("from check_quest_objectives")
