@@ -15,9 +15,9 @@ func _ready() -> void:
 # In quest_manager.gd, modify these functions:
 
 func add_quest(quest: Quest):
-	print("\n=== ADDING QUEST ===")
-	print("Quest ID:", quest.quest_id)
-	print("Initial State:", quest.state)
+	#print("\n=== ADDING QUEST ===")
+	#print("Quest ID:", quest.quest_id)
+	#print("Initial State:", quest.state)
 	
 	if quest.quest_id in quests:
 		print("⚠️ Quest already exists! Current state:", quests[quest.quest_id].state)
@@ -27,49 +27,49 @@ func add_quest(quest: Quest):
 	print("✅ Quest added. Current quests:", quests.keys())
 	
 	# Check existing inventory items
-	print("\nChecking existing inventory items...")
+	#print("\nChecking existing inventory items...")
 	for objective in quest.objectives:
 		if objective.objective_type == "collection":
-			print("  Objective:", objective.target_name, "required:", objective.required_quantity)
+			#print("  Objective:", objective.target_name, "required:", objective.required_quantity)
 			for i in range(InventoryGlobal.inventory.size()):
 				var item = InventoryGlobal.inventory[i]
 				if item != null and item.get("item_name") == objective.target_name:
-					print("    Found matching item:", item)
+					#print("    Found matching item:", item)
 					if item.quantity >= objective.required_quantity:
 						objective.is_completed = true
-						print("    ✅ Objective completed from existing items!")
+						#print("    ✅ Objective completed from existing items!")
 					else:
 						objective.collected_quantity = item.quantity
-						print("    ⏳ Partial progress:", objective.collected_quantity, "/", objective.required_quantity)
+						#print("    ⏳ Partial progress:", objective.collected_quantity, "/", objective.required_quantity)
 	
 	Global.player.update_quest_tracker()
 	quest_list_updated.emit()
 	
 	# Debug: Print all active quests after adding
-	print("\nActive quests after adding:")
-	for q in get_active_quests():
-		print("  -", q.quest_id, "State:", q.state)
-	print("===================\n")
+	#print("\nActive quests after adding:")
+	#for q in get_active_quests():
+		#print("  -", q.quest_id, "State:", q.state)
+	#print("===================\n")
 
 func remove_quest(quest_id: String):
-	print("\n=== REMOVING QUEST ===")
-	print("Removing quest ID:", quest_id)
-	print("Current quests before removal:", quests.keys())
+	#print("\n=== REMOVING QUEST ===")
+	#print("Removing quest ID:", quest_id)
+	#print("Current quests before removal:", quests.keys())
 	
 	# Print quest state before removal
 	if quest_id in quests:
 		var quest = quests[quest_id]
-		print("Quest state before removal:", quest.state)
-		print("Objectives:")
-		for obj in quest.objectives:
-			print("  -", obj.target_name, "Completed:", obj.is_completed)
+		#print("Quest state before removal:", quest.state)
+		#print("Objectives:")
+		#for obj in quest.objectives:
+			#print("  -", obj.target_name, "Completed:", obj.is_completed)
 	
 	quests.erase(quest_id)
 	quest_list_updated.emit()
 	Global.player.update_quest_tracker()
 	
-	print("Remaining quests:", quests.keys())
-	print("===================\n")
+	#print("Remaining quests:", quests.keys())
+	#print("===================\n")
 	
 func get_quest(quest_id : String) -> Quest:
 	return quests.get(quest_id,null)
@@ -101,7 +101,7 @@ func update_quest(quest_id : String, state : String):
 	
 func get_active_quests() -> Array:
 	var active_quests = []
-	print("[GET_ACTIVE_QUESTS] quests = ",quests)
+	#print("[GET_ACTIVE_QUESTS] quests = ",quests)
 	for quest in quests.values():
 		#print("[GET_ACTIVE_QUESTS] ",quest)
 		if quest.state == "in_progress":

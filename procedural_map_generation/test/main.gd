@@ -36,12 +36,9 @@ var level_plan = {
 	}
 }
 var city_segments = [
-	{ "type": "road", "length": 40, "height":45 },
-	{ "type": "building", "length": 40, "height":40 },
-	{ "type": "park", "length": 60, "height":45 },
-	{ "type": "building", "length": 40, "height":35 },
-	{ "type": "road", "length": 60, "height":40 },
-	{ "type": "road", "length": 60, "height":30 }
+	{ "type": "road", "length": 40, "height":65 },
+	{ "type": "building", "length": 40, "height":20 },
+	{ "type": "road", "length": 20, "height":30 }
 ]
 
 const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
@@ -218,7 +215,7 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 	
 	# After map generation is complete
 	var spawn_pos = find_player_spawn_position()
-	spawn_player(spawn_pos)
+	#spawn_player(spawn_pos)
 	
 	for i in terrain_change:
 		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))

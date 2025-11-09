@@ -8,14 +8,14 @@ var npc: Node = null
 
 # Show dialog with data
 func show_dialog(npc, text = "", options = {}):
+	
 	if text != "":
 		# Show empty box
 		dialog_ui.show_dialog(npc.npc_name, text, options)
 	else:
 		var quest_dialog = npc.get_quest_dialog()
 		if quest_dialog["text"] != "":
-			dialog_ui.show_dialog(npc.npc_name,quest_dialog["text"],quest_dialog["options"])
-			
+			dialog_ui.show_dialog(npc.npc_name, quest_dialog["text"], quest_dialog["options"])
 		# Show non quest related data
 		else:
 			var dialog = npc.get_current_dialog()
@@ -39,11 +39,7 @@ func handle_dialog_choice(option):
 	npc.set_dialog_state(next_state)
 	
 	# Handle state transitions
-	if next_state == "end":
-		if npc.current_branch_index < npc.dialog_resource.get_npc_dialog(npc.npc_id).size() - 1:
-			npc.set_dialog_tree(npc.current_branch_index + 1)
-		hide_dialog()
-	elif next_state == "exit":
+	if next_state == "exit":
 		 # Check if we just completed a quest dialog
 		var quest_dialog = npc.get_quest_dialog()
 		if quest_dialog.text != "":

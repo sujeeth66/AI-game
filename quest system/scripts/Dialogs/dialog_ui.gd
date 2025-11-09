@@ -13,6 +13,9 @@ func _ready():
 # show dialog box
 func show_dialog(speaker, text, options):
 	panel.visible = true
+	print("[DIALOG_UI] SHOW_DIALOG")
+	Global.player.inventory_hotbar.visible = false
+	Global.can_move = false
 	
 	# Populate data
 	dialog_speaker.text = speaker
@@ -36,6 +39,7 @@ func _on_option_selected(option):
 	
 # hide dialog box
 func hide_dialog():
+	print("[DIALOG_UI] hide_dialog")
 	Global.player.inventory_hotbar.visible = true
 	panel.visible = false
 	Global.can_move = true

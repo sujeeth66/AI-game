@@ -51,7 +51,6 @@ func _ready() -> void:
 	update_quest_tracker()
 	update_coins(110)
 	global_quest_ui = Global.global_quest_ui
-	inventory_hotbar.visible = false
 	add_to_group("player")
 	selected_quest = global_quest_ui.selected_quest
 	print("selected_quest------------player ready",selected_quest.quest_id if selected_quest else 0)
@@ -169,7 +168,6 @@ func _input(event: InputEvent) -> void:
 			if target != null:
 				var target_parent = target.get_parent()
 				if target.is_in_group("NPC"):
-					inventory_hotbar.visible = false
 					Global.can_move = false
 					target.start_dialog()
 					check_quest_objectives(target.npc_id,"talk_to")

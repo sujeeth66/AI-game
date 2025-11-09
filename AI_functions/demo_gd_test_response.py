@@ -10,8 +10,8 @@ def generate_map():
         "surface": {
             "type": "forest",
             "segments": [
-                {"type": "plains", "length": 300},
-                {"type": "forest", "length": 100},
+                {"type": "plains", "length": 100},
+                {"type": "city", "length": 100},
                 {"type": "mountains", "length": 80}
             ]
         },

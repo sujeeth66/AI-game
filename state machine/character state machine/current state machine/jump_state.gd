@@ -23,6 +23,7 @@ func enter():
 	
 	
 func physics_update(delta):
+	print(character.velocity)
 	# Get input direction with deadzone
 	var input_direction = Input.get_axis("move_left", "move_right")
 	
@@ -31,17 +32,22 @@ func physics_update(delta):
 		
 	drag_timer += delta
 	
-	if character.is_on_wall_only():
+	if character.is_on_wall_only() and not input_direction:
 		wall_collided = true
 		
 	if wall_collided == true:
+		can_wall_jump = true
 		if not character.is_on_floor() :
-			if not GlobalStates.is_wall_jumping :
+			if not input_direction:
+				
 				character.velocity = Vector2i(0,20)
 			else:
 				character.velocity.x = direction * 200 * abs(input_direction)
 		else:
 			wall_collided = false
+	else:
+		can_wall_jump = false
+		character.velocity.x = direction * 200 * abs(input_direction)
 			
 	# Only update direction if it's different from current direction
 	if input_direction != 0 :
@@ -51,16 +57,6 @@ func physics_update(delta):
 	
 	GlobalStates.facing_right = direction > 0
 	_update_sprite_direction()
-	# Apply movement
-	if wall_collided :
-		if not GlobalStates.is_wall_jumping:
-			character.velocity.x = 0
-		else:
-			pass
-		can_wall_jump = true
-	else:
-		can_wall_jump = false
-		character.velocity.x = direction * 200 * abs(input_direction)  # Scale by input magnitude
 	
 	# Variable jump height - if jump button is released early, reduce upward velocity
 	if not Input.is_action_pressed("jump") and character.velocity.y < 0:
