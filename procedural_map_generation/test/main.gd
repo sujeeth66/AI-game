@@ -113,6 +113,7 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 	map_width = dims["width"]
 	map_height = dims["height"]
 	Global.map_height = map_height
+	Global.map_width = map_width
 	print("map width and height: ",map_width,",",map_height)
 	GridUtils.initialize_empty_grid(map_grid, map_width, map_height,surface_height)
 	var x_cursor = 0
@@ -225,6 +226,7 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
 		
 	# Build global surface_tiles array
+	Global.surface_tiles.clear()
 	for x in range(map_width):
 		var found = false
 		for y in range(map_height-5,0,-1):

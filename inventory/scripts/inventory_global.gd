@@ -29,14 +29,11 @@ func setup_global_variables():
 
 func _refresh_references():
 	if player == null or not is_instance_valid(player):
-		if "player" in Global:
-			player = Global.player
+		player = Global.player
 	if quest_manager == null or not is_instance_valid(quest_manager):
-		if "global_quest_manager" in Global:
+		quest_manager = Global.global_quest_manager
+		if quest_manager == null :
 			quest_manager = Global.global_quest_manager
-		if quest_manager == null and player != null:
-			if player.has_node("QuestManager"):
-				quest_manager = player.get_node("QuestManager")
 
 func _update_quest_progress_for_item(item_name: String, quantity: int) -> void:
 	_refresh_references()

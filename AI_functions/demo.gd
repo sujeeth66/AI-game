@@ -10,6 +10,8 @@ var http_quest: HTTPRequest
 var http_npc: HTTPRequest
 var http_item: HTTPRequest
 var http_placement: HTTPRequest
+var map_height = 0
+var map_width = 0
 
 # Store data between async calls
 var quest_data = null
@@ -54,7 +56,9 @@ func _ready() -> void:
 
 func _on_map_ready():
 	print("[demo.gd] Map generation finished, starting AI-driven NPC/Quest generation pipeline.")
-	# Start the async pipeline: Quest -> NPC -> Placement
+	map_height = Global.map_height
+	map_width = Global.map_width
+# Start the async pipeline: Quest -> NPC -> Placement
 	request_quest_generation()
 
 func request_quest_generation():
@@ -199,9 +203,7 @@ func spawn_items_on_map():
 		return
 	
 	var spawn_count = item_data.get("spawn_count", 5)
-	var map_width = Global.map_width if "map_width" in Global else 500
-	var map_height = Global.map_height if "map_height" in Global else 100
-	var surface_tiles = Global.surface_tiles if "surface_tiles" in Global else []
+	var surface_tiles = Global.surface_tiles 
 	
 	if surface_tiles.is_empty():
 		print("[demo.gd] ⚠️ No surface tiles available for spawning")
@@ -219,9 +221,8 @@ func spawn_items_on_map():
 	
 	while spawned < spawn_count and attempts < max_attempts:
 		attempts += 1
-		var random_x = randi_range(50, surface_tiles.size() - 50)
-		if random_x >= surface_tiles.size():
-			continue
+		var margin = min(50, surface_tiles.size() / 4)
+		var random_x = randi_range(margin, surface_tiles.size() - 1 - margin)
 		
 		var surface_pos = surface_tiles[random_x]
 		if surface_pos.y == -1:
@@ -285,8 +286,8 @@ func _on_npc_generated(result: int, response_code: int, headers: PackedStringArr
 func request_npc_placement():
 	print("[demo.gd] Requesting NPC placement from AI...")
 	var payload = {
-		"map_width": Global.map_width if "map_width" in Global else 500,
-		"map_height": Global.map_height if "map_height" in Global else 100,
+		"map_width": map_width ,
+		"map_height": map_height ,
 		"surface_tiles": [],  # Could send subset of surface data
 		"npc_type": npc_data.get("npc_type", "generic")
 	}
@@ -380,12 +381,10 @@ func create_and_place_npc():
 	else:
 		print("[demo.gd] TileMapLayer node NOT found on root!")
 	
-	var map_height = Global.map_height
-	
 	if npc and tilemap != null and map_height != null:
 		var surf_x = placement_data.get("placement_x", 200)
 		print("[demo.gd] Placing NPC at AI-suggested position x=", surf_x)
-		var ok = npcf.place_npc_on_surface_tile_with_surface_array(npc, surf_x, map_height, tilemap)
+		var ok = npcf.place_npc_on_surface_tile_with_surface_array(npc, surf_x, tilemap)
 		if ok:
 			print("[demo.gd] ✅ NPC placed successfully at x=", surf_x, " (reasoning: ", placement_data.get("reasoning"), ")")
 		else:

@@ -16,10 +16,13 @@ var quest_manager : Node2D = null
 
 func _ready():
 	# Load dialog data
-	dialog_resource.load_from_json("res://quest system/Resources/Dialog/dialog_data.json")
+	dialog_resource.load_and_merge_dialogs(
+	"res://quest system/Resources/Dialog/dialog_data.json",
+	"user://dialog_data_runtime.json"
+)
 	# Initialize npc ref
 	dialog_manager.npc = self
-	quest_manager = Global.player.quest_manager
+	quest_manager = Global.global_quest_manager
 	# Initialize quest manager reference
 	
 func start_dialog():

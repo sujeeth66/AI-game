@@ -20,7 +20,7 @@ func create_npc(
 		quests: Array = [],
 		parent: Node = null,
 		persist_dialog_to_json: bool = true,
-		dialog_json_path: String = "res://quest system/Resources/Dialog/dialog_data.json"
+		dialog_json_path: String = "user://dialog_data_runtime.json"
 	) -> Node:
 	var npc
 	if npc_scene_or_node is PackedScene:
@@ -29,10 +29,8 @@ func create_npc(
 		npc = npc_scene_or_node
 
 	# Basic identity
-	if "npc_id" in npc:
-		npc.npc_id = npc_id
-	if "npc_name" in npc:
-		npc.npc_name = npc_name
+	npc.npc_id = npc_id
+	npc.npc_name = npc_name
 
 	# Link quests
 	link_quests_to_npc(npc, quests)
@@ -46,13 +44,15 @@ func create_npc(
 		}
 	}
 	dialog_res.dialogs = dialogs_dict
-	if "dialog_resource" in npc:
-		npc.dialog_resource = dialog_res
+	npc.dialog_resource = dialog_res
 
 	# Persist dialog to the shared JSON so npc.gd load_from_json keeps it consistent
 	if persist_dialog_to_json:
 		upsert_npc_dialog_in_json(npc_id, npc_name, dialog_trees, dialog_json_path)
-
+		
+	print("Dialog runtime path:", OS.get_user_data_dir() + "/dialog_data_runtime.json")
+	print("Exists:", FileAccess.file_exists("user://dialog_data_runtime.json"))
+	
 	# Add to parent if provided
 	if parent:
 		parent.call_deferred("add_child", npc)
@@ -61,7 +61,7 @@ func create_npc(
 
 
 func link_quests_to_npc(npc: Node, quests: Array) -> void:
-	if npc and "quests" in npc:
+	if npc :
 		var filtered: Array[Quest] = []
 		for q in quests:
 			if q is Quest:
@@ -73,13 +73,8 @@ func link_quests_to_npc(npc: Node, quests: Array) -> void:
 ## Expected JSON top-level format:
 ## { "<npc_id>": { "name": "<npc_name>", "trees": [ ... ] }, ... }
 func upsert_npc_dialog_in_json(npc_id: String, npc_name: String, dialog_trees: Array, json_path: String) -> void:
+	ensure_user_dialog_file_exists(json_path)
 	var existing: Dictionary = {}
-	if FileAccess.file_exists(json_path):
-		var raw := FileAccess.get_file_as_string(json_path)
-		if raw and raw.length() > 0:
-			var parsed = JSON.parse_string(raw)
-			if typeof(parsed) == TYPE_DICTIONARY:
-				existing = parsed
 
 	var npc_entry := {
 		"name": npc_name,
@@ -94,6 +89,21 @@ func upsert_npc_dialog_in_json(npc_id: String, npc_name: String, dialog_trees: A
 		file.flush()
 		file.close()
 
+func ensure_user_dialog_file_exists(dialog_json_path: String) -> void:
+	if FileAccess.file_exists(dialog_json_path):
+		var raw := FileAccess.get_file_as_string(dialog_json_path)
+		if raw != null and raw.length() > 0:
+			var parsed = JSON.parse_string(raw)
+			if typeof(parsed) == TYPE_DICTIONARY:
+				return
+
+	var f := FileAccess.open(dialog_json_path, FileAccess.WRITE)
+	if f == null:
+		push_error("Failed to create/repair dialog runtime file at: " + dialog_json_path)
+		return
+
+	f.store_string("{}")
+	f.close()
 
 ## Convenience: build a simple dialog tree structure
 ## Example result to pass as a tree:
@@ -119,10 +129,10 @@ func build_dialog_entry(state: String, text: String, options: Dictionary) -> Dic
 # --- Placement utilities ---
 # All now explicitly require tilemap argument!
 ## Place NPC at visual ground using global surface_tiles array.
-## surf_x = desired column; map_height = map tile height; tilemap = map TileMap node.
-func place_npc_on_surface_tile_with_surface_array(npc: Node2D, surf_x: int, map_height: int, tilemap) -> bool:
+## surf_x = desired column;  =  tilemap = map TileMap node.
+func place_npc_on_surface_tile_with_surface_array(npc: Node2D, surf_x: int, tilemap) -> bool:
 	var surface_tiles = Global.surface_tiles
-	print("[npc_factory] Placing NPC at surf_x=", surf_x, ", map_height=", map_height, ", tilemap=", tilemap)
+	print("[npc_factory] Placing NPC at surf_x=", surf_x,  ", tilemap=", tilemap)
 	if surf_x >= 0 and surf_x < surface_tiles.size() and tilemap and surface_tiles[surf_x].y != -1:
 		var surf_pos = surface_tiles[surf_x] # Vector2i(x, y)
 		var cell_pos = Vector2i(surf_pos.x, surf_pos.y - 1 )
@@ -131,7 +141,7 @@ func place_npc_on_surface_tile_with_surface_array(npc: Node2D, surf_x: int, map_
 		print("[npc_factory] NPC placed at surface tile:", surf_pos, " cell_pos:", cell_pos, " world_pos:", world_pos)
 		return true
 	else:
-		print("[npc_factory] Invalid surface tile placement for surf_x=", surf_x, ", tilemap=", tilemap, ", map_height=", map_height, ", surface_tile=", surface_tiles[surf_x] if surf_x < surface_tiles.size() else "out of range")
+		print("[npc_factory] Invalid surface tile placement for surf_x=", surf_x, ", tilemap=", tilemap, ", surface_tile=", surface_tiles[surf_x] if surf_x < surface_tiles.size() else "out of range")
 		return false
 
 
