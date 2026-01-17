@@ -1,6 +1,6 @@
 [gd_scene load_steps=20 format=4 uid="uid://dile8xc6cko2r"]
 
-[ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/test/main.gd" id="1_choun"]
+[ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/main.gd" id="1_choun"]
 [ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_85g3d"]
 [ext_resource type="TileSet" uid="uid://b5w6h4x5y1w7f" path="res://textures/world.tres" id="3_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://bfbwkogkdn0jn" path="res://scenes/player.tscn" id="3_h2yge"]
@@ -9,7 +9,7 @@
 [ext_resource type="Script" uid="uid://cf8wf7o6vqcv7" path="res://quest system/Resources/Quest/Quest.gd" id="7_jkv2x"]
 [ext_resource type="Script" uid="uid://dwice8iy7ng3d" path="res://quest system/Resources/Quest/Objectives.gd" id="8_jbj1t"]
 [ext_resource type="Script" uid="uid://5dvtjkl50wsh" path="res://quest system/Resources/Quest/Rewards.gd" id="9_muem4"]
-[ext_resource type="Script" uid="uid://ddm3vuhrrscfk" path="res://procedural_map_generation/test/ItemSpawner.gd" id="10_choun"]
+[ext_resource type="Script" uid="uid://ddm3vuhrrscfk" path="res://procedural_map_generation/ItemSpawner.gd" id="10_choun"]
 [ext_resource type="Script" uid="uid://dg72emo61j37b" path="res://AI_functions/demo.gd" id="11_ya4ey"]
 [ext_resource type="Script" uid="uid://cisjig02lh1rw" path="res://AI_functions/npc_factory.gd" id="12_eb6dy"]
 
