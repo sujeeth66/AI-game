@@ -47,7 +47,6 @@ func physics_update(delta: float):
 	var acceleration = ACCELERATION if sign(character.velocity.x) == sign(target_speed) else DECELERATION
 	
 	character.velocity.x = move_toward(character.velocity.x, target_speed, acceleration * delta * 60)
-	character.move_and_slide()
 	
 	# Check for dash input at the end of physics update
 	if Input.is_action_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST) :

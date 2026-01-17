@@ -1,5 +1,5 @@
 extends Node
-#current
+
 class_name CharStateMachine
 
 @onready var character = get_parent()
@@ -35,6 +35,8 @@ func _physics_process(delta: float) -> void:
 		
 	if current_state:
 		current_state.physics_update(delta)
+		
+	character.move_and_slide()
 		
 	
 func _input(event: InputEvent) -> void:

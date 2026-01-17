@@ -11,7 +11,7 @@ def generate_map():
             "type": "forest",
             "segments": [
                 {"type": "plains", "length": 100},
-                {"type": "desert", "length": 100},
+                {"type": "city", "length": 100},
                 {"type": "mountains", "length": 80}
             ]
         },

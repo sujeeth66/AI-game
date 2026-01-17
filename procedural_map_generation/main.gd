@@ -4,7 +4,7 @@ extends Node2D
 @onready var items : Node2D = $Items
 @onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
 @onready var http_request := $HTTPRequest
-@onready var ai_map_generator = preload("res://procedural_map_generation/test/AIMapGenerator.gd").new()
+@onready var ai_map_generator = preload("res://procedural_map_generation/AIMapGenerator.gd").new()
 @onready var player_scene = preload("res://scenes/player.tscn")
 
 var player = null
@@ -41,15 +41,15 @@ var city_segments = [
 	{ "type": "road", "length": 20, "height":30 }
 ]
 
-const GridUtils = preload("res://procedural_map_generation/test/GridUtils.gd")
-const TunnelGen = preload("res://procedural_map_generation/test/TunnelGen.gd")
-const TunnelConnector = preload("res://procedural_map_generation/test/TunnelConnector.gd")
-const TunnelRooms = preload("res://procedural_map_generation/test/TunnelRooms.gd")
-const TunnelUtils = preload("res://procedural_map_generation/test/TunnelUtils.gd")
-const TilemapDraw = preload("res://procedural_map_generation/test/TileMapDraw.gd")
-const RoomAnalyzer = preload("res://procedural_map_generation/test/RoomAnalyzer.gd")
-const ItemSpawner = preload("res://procedural_map_generation/test/ItemSpawner.gd")
-const MapGen = preload("res://procedural_map_generation/test/MapGeneration.gd")
+const GridUtils = preload("res://procedural_map_generation/GridUtils.gd")
+const TunnelGen = preload("res://procedural_map_generation/TunnelGen.gd")
+const TunnelConnector = preload("res://procedural_map_generation/TunnelConnector.gd")
+const TunnelRooms = preload("res://procedural_map_generation/TunnelRooms.gd")
+const TunnelUtils = preload("res://procedural_map_generation/TunnelUtils.gd")
+const TilemapDraw = preload("res://procedural_map_generation/TileMapDraw.gd")
+const RoomAnalyzer = preload("res://procedural_map_generation/RoomAnalyzer.gd")
+const ItemSpawner = preload("res://procedural_map_generation/ItemSpawner.gd")
+const MapGen = preload("res://procedural_map_generation/MapGeneration.gd")
 
 signal map_generation_finished
 
@@ -58,7 +58,7 @@ func _ready():
 	
 	# Add the AI map generator to the scene tree
 	if not is_instance_valid(ai_map_generator):
-		ai_map_generator = preload("res://procedural_map_generation/test/AIMapGenerator.gd").new()
+		ai_map_generator = preload("res://procedural_map_generation/AIMapGenerator.gd").new()
 	if not is_inside_tree():
 		await ready
 	add_child(ai_map_generator)

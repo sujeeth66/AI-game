@@ -33,7 +33,6 @@ func enter():
 func physics_update(delta):
 	if dash_timer > 0:
 		dash_timer -= delta
-		character.move_and_slide()
 		return
 	
 	# Start cooldown
@@ -43,7 +42,6 @@ func physics_update(delta):
 	cooldown_timer += delta
 	if cooldown_timer < DASH_COOLDOWN:
 		character.velocity.x = 0
-		character.move_and_slide()
 		return
 	
 	# Dash complete, transition to appropriate state

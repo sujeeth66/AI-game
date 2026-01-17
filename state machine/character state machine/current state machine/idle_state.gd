@@ -3,6 +3,9 @@ extends CharState
 class_name CharIdleState
 
 func enter():
+	if not character.is_on_floor():
+		state_machine.change_state("fallstate")
+		return
 	animated_sprite.play("idle")
 	# Ensure the sprite maintains its current facing direction
 	_update_sprite_direction()
@@ -31,7 +34,6 @@ func handle_input(event: InputEvent):
 func physics_update(delta: float):
 	# Apply friction or other physics here
 	character.velocity.x = move_toward(character.velocity.x, 0, 20.0)
-	character.move_and_slide()
 
 func exit():
 	#print("Exiting idle state")
