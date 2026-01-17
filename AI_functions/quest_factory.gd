@@ -4,7 +4,7 @@ const Quest = preload("res://quest system/Resources/Quest/Quest.gd")
 const Objectives = preload("res://quest system/Resources/Quest/Objectives.gd")
 const Rewards = preload("res://quest system/Resources/Quest/Rewards.gd")
 
-## Factory helpers for building Quest resources compatible with the existing quest system
+# Factory helpers for building Quest resources compatible with the existing quest system
 
 func create_quest(
 		quest_id: String,
