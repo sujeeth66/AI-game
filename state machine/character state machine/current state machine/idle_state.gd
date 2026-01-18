@@ -12,6 +12,17 @@ func enter():
 	print("Entered idle state")
 
 func handle_input(event: InputEvent):
+	print(event)
+		
+	# Check for dash input
+	if Input.is_action_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST):
+		state_machine.change_state("dashstate")
+		return
+
+func physics_update(delta: float):
+	# Apply friction or other physics here
+	character.velocity.x = move_toward(character.velocity.x, 0, 20.0)
+	
 	# Check for movement input
 	var input_direction = Input.get_axis("move_left", "move_right")
 	if input_direction != 0:
@@ -25,15 +36,6 @@ func handle_input(event: InputEvent):
 	if Input.is_action_pressed("jump") and character.is_on_floor():
 		state_machine.change_state("jumpstate")
 		return
-		
-	# Check for dash input
-	if Input.is_action_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST):
-		state_machine.change_state("dashstate")
-		return
-
-func physics_update(delta: float):
-	# Apply friction or other physics here
-	character.velocity.x = move_toward(character.velocity.x, 0, 20.0)
 
 func exit():
 	animated_sprite.stop()

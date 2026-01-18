@@ -35,6 +35,7 @@ func _physics_process(delta: float) -> void:
 		character.velocity.y = min(character.velocity.y + GRAVITY * delta, MAX_FALL_SPEED)
 	
 	if fireball_pressed and not knockback_applied:
+		character.animated_sprite.play("knockback")
 		character.velocity.x = move_toward(character.velocity.x,0,20)
 		character.move_and_slide()
 		return
@@ -42,7 +43,9 @@ func _physics_process(delta: float) -> void:
 	# Check for knockback from fireball
 	if knockback_applied:
 		knockback_applied = false    # Reset flag
+		character.animated_sprite.stop()
 		character.move_and_slide()
+		change_state("idlestate")
 		return  # Skip normal state processing
 	
 	if current_state:
@@ -85,7 +88,7 @@ func _on_fireball_launched(direction):
 	fireball_pressed = false
 	character.velocity.x -= direction.x * 500
 	character.move_and_slide()
-	#print("Fireball launched - applying knockback",direction)
+	print("Fireball launched - applying knockback",direction)
 
 func _on_fireball_pressed():
 	fireball_pressed = true

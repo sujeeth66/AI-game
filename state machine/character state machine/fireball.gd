@@ -12,6 +12,8 @@ extends Area2D
 var launched := false
 var damage_active := false
 var knockback_active := true  # Start with knockback active
+var parent_node: Node2D = null
+var scene_tree: SceneTree = null  # Store scene tree reference
 
 signal fireball_launched(direction: Vector2)
 signal fireball_pressed()
@@ -20,6 +22,7 @@ func _ready() -> void:
 	# Initial visual effect
 	animated_sprite.play("spawn")
 	fireball_pressed.emit()
+	print("[FIREBALL PRESSED]")
 	await animated_sprite.animation_finished
 
 	# Activate motion and damage
@@ -97,3 +100,40 @@ func apply_splash_damage() -> void:
 			if node != null and node.has_method("take_damage") and node != self:
 				node.take_damage(damage / 2)
 				print("💥 Splash hit:", node.name, "for", damage / 2, "damage")
+
+func set_parent(parent: Node2D, tree: SceneTree):
+	parent_node = parent
+	scene_tree = tree
+	
+	# Remove from current parent if exists
+	if get_parent():
+		get_parent().remove_child(self)
+	
+	# Add as child to parent (not reparent)
+	parent.add_child(self)
+	
+	# Set local position relative to player
+	self.position = Vector2(20 if GlobalStates.facing_right else -20, 0)
+	
+	# Emit signal after parenting
+	fireball_pressed.emit()
+
+func launch():
+	if launched:
+		return
+	
+	# Remove from player parent
+	if get_parent():
+		get_parent().remove_child(self)
+	
+	# Add to scene tree
+	scene_tree.current_scene.add_child(self)
+	
+	# Convert local position to global position
+	self.global_position = parent_node.global_position + Vector2(50 if GlobalStates.facing_right else -50, 0)
+	
+	# Launch fireball
+	launched = true
+	damage_active = true
+	animated_sprite.play("move")
+	fireball_launched.emit(direction)
