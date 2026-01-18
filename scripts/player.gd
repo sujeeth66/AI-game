@@ -36,7 +36,8 @@ var global_quest_ui
 @onready var inventory_ui: CanvasLayer = $inventory_ui
 @onready var inventory_hotbar: CanvasLayer = $InventoryHotbar
 @onready var animated_sprite: AnimatedSprite2D = $body_animated_sprites
-@onready var ray_cast: RayCast2D = $RayCast2D
+@onready var interaction_ray_cast: RayCast2D = $InteractionRayCast
+@onready var wall_ray_cast: RayCast2D = $WallRayCast
 
 @onready var amount: Label = $HUD/Coins/Amount
 @onready var quest_tracker: ColorRect = $HUD/QuestTracker
@@ -66,6 +67,8 @@ func _ready() -> void:
 	#quest_manager.get_active_quests()
 
 func _physics_process(delta: float) -> void:
+	#print(velocity.y)
+		
 	if _handle_respawn(delta):
 		return
 	# Regenerate resources
@@ -164,7 +167,7 @@ func _input(event: InputEvent) -> void:
 	
 	if Global.can_move:
 		if event.is_action_pressed("interact"):
-			var target = ray_cast.get_collider()
+			var target = interaction_ray_cast.get_collider()
 			if target != null:
 				var target_parent = target.get_parent()
 				if target.is_in_group("NPC"):

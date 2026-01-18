@@ -6,7 +6,8 @@ class_name CharStateMachine
 @export var initial_state: CharState
 var current_state: CharState
 var states: Dictionary = {}
-
+var knockback_applied = false  # Track if knockback was applied
+var fireball_pressed = false
 # Physics properties
 var GRAVITY = 800
 var MAX_FALL_SPEED = 1000
@@ -24,15 +25,26 @@ func _ready() -> void:
 		change_state(initial_state.name.to_lower())
 	
 func _process(delta: float) -> void:
+	#print("[STATE MACHINE]",current_state)
 	if current_state:
 		current_state.update(delta)
 	
 func _physics_process(delta: float) -> void:
-	
 	# Apply gravity
 	if not character.is_on_floor():
 		character.velocity.y = min(character.velocity.y + GRAVITY * delta, MAX_FALL_SPEED)
+	
+	if fireball_pressed and not knockback_applied:
+		character.velocity.x = move_toward(character.velocity.x,0,20)
+		character.move_and_slide()
+		return
 		
+	# Check for knockback from fireball
+	if knockback_applied:
+		knockback_applied = false    # Reset flag
+		character.move_and_slide()
+		return  # Skip normal state processing
+	
 	if current_state:
 		current_state.physics_update(delta)
 		
@@ -63,3 +75,18 @@ func change_state(new_state_name: String) -> void:
 	# Enter new state
 	if current_state:
 		current_state.enter()
+
+func connect_fireball_signal(fireball):
+	fireball.fireball_launched.connect(_on_fireball_launched)
+	fireball.fireball_pressed.connect(_on_fireball_pressed)
+ 
+func _on_fireball_launched(direction):
+	knockback_applied = true
+	fireball_pressed = false
+	character.velocity.x -= direction.x * 500
+	character.move_and_slide()
+	#print("Fireball launched - applying knockback",direction)
+
+func _on_fireball_pressed():
+	fireball_pressed = true
+	print("fireball pressed")

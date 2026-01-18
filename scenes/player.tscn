@@ -701,10 +701,16 @@ position = Vector2(19, 0.5)
 shape = SubResource("RectangleShape2D_ur7pv")
 debug_color = Color(0.970763, 0, 0.452533, 0.42)
 
-[node name="RayCast2D" type="RayCast2D" parent="."]
+[node name="InteractionRayCast" type="RayCast2D" parent="."]
 position = Vector2(0, 3)
 target_position = Vector2(28, 0)
 collision_mask = 8
+
+[node name="WallRayCast" type="RayCast2D" parent="."]
+position = Vector2(0, 10)
+target_position = Vector2(12, 0)
+collision_mask = 8
+collide_with_areas = true
 
 [node name="QuestManager" parent="." instance=ExtResource("23_4ni07")]
 
@@ -772,7 +778,6 @@ text = "inventory
 [node name="Hotbar" parent="InventoryHotbar" instance=ExtResource("21_i4ail")]
 
 [node name="HUD" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="Coins" type="ColorRect" parent="HUD"]
 anchors_preset = 1

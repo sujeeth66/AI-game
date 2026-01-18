@@ -2,7 +2,7 @@ extends Node2D
 
 @onready var tilemap := $TileMapLayer
 @onready var items : Node2D = $Items
-@onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
+#@onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
 @onready var http_request := $HTTPRequest
 @onready var ai_map_generator = preload("res://procedural_map_generation/AIMapGenerator.gd").new()
 @onready var player_scene = preload("res://scenes/player.tscn")
@@ -36,9 +36,9 @@ var level_plan = {
 	}
 }
 var city_segments = [
-	{ "type": "road", "length": 40, "height":65 },
-	{ "type": "building", "length": 40, "height":20 },
-	{ "type": "road", "length": 20, "height":30 }
+	{ "type": "road", "length": 50, "height":65 },
+	{ "type": "building", "length": 10, "height":20 },
+	{ "type": "road", "length": 40, "height":50 }
 ]
 
 const GridUtils = preload("res://procedural_map_generation/GridUtils.gd")

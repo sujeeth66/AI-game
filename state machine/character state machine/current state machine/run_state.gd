@@ -10,7 +10,7 @@ func enter():
 	animated_sprite.play("run")
 	# Ensure the sprite's facing direction is correct
 	_update_sprite_direction()
-	#print("Entered run state")
+	print("Entered run state")
 
 func handle_input(event: InputEvent):
 	if Input.is_action_pressed("jump") and character.is_on_floor() :
@@ -27,9 +27,8 @@ func physics_update(delta: float):
 		animated_sprite.play("knockback")
 		return
 	elif not character.is_on_floor():
-		animated_sprite.play("jump")
-	else:
-		animated_sprite.play("run")
+		state_machine.change_state("fallstate")
+		return
 	
 	# Get input direction
 	var input_direction = Input.get_axis("move_left", "move_right")
@@ -56,7 +55,7 @@ func physics_update(delta: float):
 	# Transition to idle if not moving
 	if input_direction == 0 :
 		state_machine.change_state("idlestate")
+		return
 
 func exit():
 	animated_sprite.stop()
-	#print("Exiting run state")

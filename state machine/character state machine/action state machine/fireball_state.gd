@@ -33,6 +33,11 @@ func enter() -> void:
 	fireball.get_node("AnimatedSprite2D").flip_h = not GlobalStates.facing_right
 	fireball.damage = int(state_machine.PLAYER_BASE_DAMAGE * state_machine.FIREBALL_DAMAGE_MULTIPLIER)
 	
+	# Connect signal to CURRENT state machine, not action state machine
+	var current_state_machine = character.get_node("CharStateMachine")  # Or whatever the node name is
+	fireball.fireball_launched.connect(current_state_machine._on_fireball_launched)
+	fireball.fireball_pressed.connect(current_state_machine._on_fireball_pressed)
+	
 	# Add fireball to the scene tree (not the state machine)
 	get_tree().current_scene.add_child(fireball)
 	

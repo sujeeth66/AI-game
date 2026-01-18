@@ -11,6 +11,7 @@ var cooldown_timer := 0.0
 var is_in_cooldown := false
 
 func enter():
+	print("entered dash state")
 	# Use stamina for the dash
 	character.use_stamina(character.STAMINA_DASH_COST)
 	if character.stamina_bar:
@@ -48,8 +49,10 @@ func physics_update(delta):
 	var input_direction = Input.get_axis("move_left", "move_right")
 	if abs(input_direction) > 0.1:
 		state_machine.change_state("runstate")
+		return
 	else:
 		state_machine.change_state("idlestate")
+		return
 
 func exit():
 	animated_sprite.stop()

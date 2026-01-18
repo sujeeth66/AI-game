@@ -13,18 +13,20 @@ var launched := false
 var damage_active := false
 var knockback_active := true  # Start with knockback active
 
+signal fireball_launched(direction: Vector2)
+signal fireball_pressed()
+
 func _ready() -> void:
 	# Initial visual effect
 	animated_sprite.play("spawn")
+	fireball_pressed.emit()
 	await animated_sprite.animation_finished
 
 	# Activate motion and damage
 	damage_active = true
 	animated_sprite.play("move")
 	launched = true
-	
-	# Fireball is ready to launch
-	launched = true
+	fireball_launched.emit(direction)  # Emit signal when launched
 
 func _process(delta: float) -> void:
 	if launched:

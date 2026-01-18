@@ -9,7 +9,7 @@ func enter():
 	animated_sprite.play("idle")
 	# Ensure the sprite maintains its current facing direction
 	_update_sprite_direction()
-	#print("Entered idle state")
+	print("Entered idle state")
 
 func handle_input(event: InputEvent):
 	# Check for movement input
@@ -36,5 +36,4 @@ func physics_update(delta: float):
 	character.velocity.x = move_toward(character.velocity.x, 0, 20.0)
 
 func exit():
-	#print("Exiting idle state")
-	pass
+	animated_sprite.stop()
