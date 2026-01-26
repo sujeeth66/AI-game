@@ -80,7 +80,7 @@ def generate_npc():
     context = data.get("context", "") if data else ""
     location = data.get("location", "unknown") if data else "unknown"
     
-    # Placeholder NPC data
+    # Placeholder NPC data with enhanced dialog branches
     response = {
         "npc_id": "npc_demo_alchemist",
         "npc_name": "Alchemist",
@@ -102,6 +102,31 @@ def generate_npc():
                         "text": "Bring me 3 Slime Gels.",
                         "options": {
                             "Okay": "exit"
+                        }
+                    }
+                ]
+            },
+            {
+                "branch_id": "quest_in_progress",
+                "dialogs": [
+                    {
+                        "state": "start",
+                        "text": "Hello again! Have you collected those 3 Slime Gels yet?",
+                        "options": {
+                            "Still working on it": "exit",
+                            "Where can I find them?": "exit"
+                        }
+                    }
+                ]
+            },
+            {
+                "branch_id": "post_quest_completion",
+                "dialogs": [
+                    {
+                        "state": "start",
+                        "text": "Thank you so much for the slime gel! Your reward has been delivered.",
+                        "options": {
+                            "You're welcome": "exit"
                         }
                     }
                 ]
@@ -133,7 +158,7 @@ def generate_item():
         "item_type": "quest_item",
         "item_effect": "none",
         "item_texture_path": "res://textures/slime_gel.png",
-        "spawn_count": 5,  # Number to spawn on map
+        "spawn_count": 25,  # Number to spawn on map
         "drop_rate": 0.8,  # 80% chance to drop from slimes
         "description": "A sticky gel extracted from slimes. Used in various alchemical recipes."
     }

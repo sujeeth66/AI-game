@@ -69,7 +69,7 @@ func request_quest_generation():
 	}
 	var headers = ["Content-Type: application/json"]
 	var body = JSON.stringify(payload)
-	var error = http_quest.request(ENDPOINT_BASE + "/generate-quest", headers, HTTPClient.METHOD_POST, body)
+	var error = http_quest.request(ENDPOINT_BASE + "/content/quest", headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		push_error("[demo.gd] Failed to send quest generation request: ", error)
 
@@ -118,7 +118,7 @@ func request_item_generation():
 	}
 	var headers = ["Content-Type: application/json"]
 	var body = JSON.stringify(payload)
-	var error = http_item.request(ENDPOINT_BASE + "/generate-item", headers, HTTPClient.METHOD_POST, body)
+	var error = http_item.request(ENDPOINT_BASE + "/content/item", headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		push_error("[demo.gd] Failed to send item generation request: ", error)
 
@@ -156,9 +156,9 @@ func _on_item_generated(result: int, response_code: int, headers: PackedStringAr
 func create_item_if_not_exists():
 	var item_name = item_data.get("item_name")
 	var exists = false
-	
+	print(";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",item_name)
 	# Check if item already exists
-	for item in InventoryGlobal.items:
+	for item in InventoryGlobal.items.values():
 		if item.get("item_name") == item_name:
 			exists = true
 			print("[demo.gd] Item '", item_name, "' already exists in items list")
@@ -167,7 +167,7 @@ func create_item_if_not_exists():
 	if not exists:
 		# Load or create texture
 		var texture_path = item_data.get("item_texture_path", "res://icon.svg")
-		var texture = null
+		var texture: CompressedTexture2D = load(texture_path) if texture_path != "" else null
 		if ResourceLoader.exists(texture_path):
 			texture = load(texture_path)
 		else:
@@ -239,6 +239,7 @@ func spawn_items_on_map():
 			texture
 		)
 		item_instance.global_position = world_pos
+		print("item spawn location-----------------------",world_pos)
 		items_node.add_child(item_instance)
 		spawned += 1
 	
@@ -252,7 +253,7 @@ func request_npc_generation():
 	}
 	var headers = ["Content-Type: application/json"]
 	var body = JSON.stringify(payload)
-	var error = http_npc.request(ENDPOINT_BASE + "/generate-npc", headers, HTTPClient.METHOD_POST, body)
+	var error = http_npc.request(ENDPOINT_BASE + "/content/npc", headers, HTTPClient.METHOD_POST, body)
 	if error != OK:
 		push_error("[demo.gd] Failed to send NPC generation request: ", error)
 

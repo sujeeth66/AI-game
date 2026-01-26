@@ -1,7 +1,7 @@
 # AIMapGenerator.gd
 extends Node
 
-const ENDPOINT := "http://127.0.0.1:8000/generate-map"
+const ENDPOINT := "http://127.0.0.1:8000/level/generate"
 
 # Default level plan structure that matches our map generation system
 const DEFAULT_LEVEL_PLAN = {
@@ -28,7 +28,7 @@ func generate_map_from_lore(lore: String, http_request: HTTPRequest) -> void:
 	if not http_request.is_inside_tree():
 		push_error("❌ HTTPRequest not in tree")
 		return
-
+	#var rresult = http_request.request(ENDPOINT + "/game/new", headers, HTTPClient.METHOD_POST, body)
 	var result = http_request.request(ENDPOINT, headers, HTTPClient.METHOD_POST, body)
 	if result != OK:
 		push_error("⚠️ Failed to send request: %s" % result)

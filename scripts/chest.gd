@@ -150,12 +150,12 @@ func generate_loot() -> Array:
 func get_items_for_tier(tier: String, distance: float) -> Array:
 	print("Getting items for tier: ", tier, ", distance: ", distance)
 	print("Total items in InventoryGlobal: ", InventoryGlobal.items.size())
-	for item in InventoryGlobal.items:
+	for item in InventoryGlobal.items.values():
 		print("item heals-",item.get("item_effect",""))
 	var filtered_items = []
 	
 	
-	for item in InventoryGlobal.items:
+	for item in InventoryGlobal.items.values():
 		var heal_amount = get_heal_amount(item.get("item_effect", ""))
 		if tier == "common" and heal_amount <= 100:
 			filtered_items.append(item)

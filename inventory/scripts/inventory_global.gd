@@ -8,13 +8,13 @@ var quest_manager : Node2D
 
 signal inventory_updated
 
-var items = [
-	{"item_type":"quest_item" , "item_name":"raw_chicken" , "item_effect":"heal - 80" , "item_texture":preload("res://textures/raw_chicken.png")},
-	{"item_type":"consumable" , "item_name":"apple" , "item_effect":"slot_boost - 1" , "item_texture":preload("res://textures/apple_icon.png")},
-	{"item_type":"consumable" , "item_name":"cooked_chicken" , "item_effect":"heal - 100" , "item_texture":preload("res://textures/cooked_chicken.png")},
-	{"item_type":"consumable" , "item_name":"raw_beef" , "item_effect":"heal - 150" , "item_texture":preload("res://textures/raw_meat.png")},
-	{"item_type":"consumable" , "item_name":"steak" , "item_effect":"heal - 250" , "item_texture":preload("res://textures/cooked_steak.png")}
-]
+var items: Dictionary = {
+	"raw_chicken": Item.new("raw_chicken", "quest_item", "heal - 80", preload("res://textures/raw_chicken.png") as CompressedTexture2D),
+	"apple": Item.new("apple", "consumable", "slot_boost - 1", preload("res://textures/apple_icon.png") as CompressedTexture2D),
+	"cooked_chicken": Item.new("cooked_chicken", "consumable", "heal - 100", preload("res://textures/cooked_chicken.png") as CompressedTexture2D),
+	"raw_beef": Item.new("raw_beef", "consumable", "heal - 150", preload("res://textures/raw_meat.png") as CompressedTexture2D),
+	"steak": Item.new("steak", "consumable", "heal - 250", preload("res://textures/cooked_steak.png") as CompressedTexture2D)
+}
 
 var hotbar_size = 6
 var hotbar_inventory = []
@@ -22,11 +22,11 @@ var hotbar_inventory = []
 func _ready() -> void:
 	inventory.resize(30)
 	hotbar_inventory.resize(hotbar_size)
-	call_deferred("setup_global_variables")
+	call_deferred("_refresh_references")
 	
-func setup_global_variables():
-	_refresh_references()
-
+func get_item(item_name: String) -> Item:
+	return items.get(item_name, null)
+	
 func _refresh_references():
 	if player == null or not is_instance_valid(player):
 		player = Global.player
@@ -68,34 +68,30 @@ func _update_quest_progress_for_item(item_name: String, quantity: int) -> void:
 			else:
 				pass#print("[FAILURE]Did Not Find matching objective! Updating quest progress")
 
-func add_item(item, to_hotbar = false):
+func add_item(item: Item, to_hotbar: bool = false) -> bool:
 	_refresh_references()
-
 	var added_to_hotbar = false
 	if to_hotbar:
 		added_to_hotbar = add_item_to_hotbar(item)
-	
 	if not added_to_hotbar:
 		for i in range(inventory.size()):
-			if inventory[i] != null and inventory[i]["item_name"] == item["item_name"]:
-				inventory[i]["quantity"] += item["quantity"]
-				#print("[DEBUG] Added to existing stack: ", item["item_name"])
+			if inventory[i] != null and inventory[i].item_name == item.item_name:
+				inventory[i].quantity += item.quantity
 				inventory_updated.emit()
-				_update_quest_progress_for_item(item["item_name"], item["quantity"])
+				_update_quest_progress_for_item(item.item_name, item.quantity)
 				return true
 			elif inventory[i] == null:
-				inventory[i] = item.duplicate(true)
-				#print("[DEBUG] Added new item: ", item["item_name"])
+				inventory[i] = item
 				inventory_updated.emit()
-				_update_quest_progress_for_item(item["item_name"], item["quantity"])
+				_update_quest_progress_for_item(item.item_name, item.quantity)
 				return true
 	return false
 	
-func remove_item(item_name):
+func remove_item(item_name: String) -> bool:
 	for i in range(inventory.size()):
-		if inventory[i] != null and inventory[i]["item_name"] == item_name:
-			inventory[i]["quantity"] -= 1
-			if inventory[i]["quantity"] <= 0:
+		if inventory[i] != null and inventory[i].item_name == item_name:
+			inventory[i].quantity -= 1
+			if inventory[i].quantity <= 0:
 				inventory[i] = null
 			inventory_updated.emit()
 			return true
@@ -105,41 +101,36 @@ func increase_inventory_size(extra_slots):
 	inventory.resize(inventory.size() + extra_slots)
 	inventory_updated.emit()
 	
-	
-func create_item(name, type, effect, texture):
-	var new_item = {
-		"item_name": name,
-		"item_type": type,
-		"item_effect": effect,
-		"item_texture": texture
-	}
-	items.append(new_item)
-
-func add_item_to_hotbar(item):
+func create_item(name: String, type: String, effect: String, texture: CompressedTexture2D) -> void:
+	var new_item = Item.new(name, type, effect, texture)
+	items[new_item.item_name] = new_item
+ 
+func add_item_to_hotbar(item: Item) -> bool:
 	for i in range(hotbar_size):
 		if hotbar_inventory[i] == null:
 			hotbar_inventory[i] = item
 			return true
-	return false 
-
-func remove_item_from_hotbar(item_name):
+	return false
+ 
+func remove_item_from_hotbar(item_name: String) -> bool:
 	for i in range(hotbar_inventory.size()):
-		if hotbar_inventory[i] != null and hotbar_inventory[i]["item_name"] == item_name:
-			if hotbar_inventory[i]["quantity"] <= 0:
+		if hotbar_inventory[i] != null and hotbar_inventory[i].item_name == item_name:
+			hotbar_inventory[i].quantity -= 1
+			if hotbar_inventory[i].quantity <= 0:
 				hotbar_inventory[i] = null
 			inventory_updated.emit()
 			return true
 	return false
-
-func unassign_hotbar_item(item_name):
+ 
+func unassign_hotbar_item(item_name: String) -> bool:
 	for i in range(hotbar_inventory.size()):
-		if hotbar_inventory[i] != null and hotbar_inventory[i]["item_name"] == item_name:
+		if hotbar_inventory[i] != null and hotbar_inventory[i].item_name == item_name:
 			hotbar_inventory[i] = null
 			inventory_updated.emit()
 			return true
 	return false
-
-func is_item_assigned_to_hotbar(item):
+ 
+func is_item_assigned_to_hotbar(item: Item) -> bool:
 	return item in hotbar_inventory
 
 func swap_inventory_items(index1,index2):

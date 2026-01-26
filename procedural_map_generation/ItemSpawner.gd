@@ -183,7 +183,7 @@ static func spawn_items_in_rooms(room_data: Dictionary, distance_map: Dictionary
 			heal_threshold = 120
 
 		var item_pool := []
-		for item in InventoryGlobal.items:
+		for item in InventoryGlobal.items.values():
 			if get_heal_amount(item["item_effect"]) >= heal_threshold:
 				item_pool.append(item)
 
@@ -271,7 +271,7 @@ static func spawn_boss_reward(tilemap: TileMapLayer, items: Node2D, map_grid: Ar
 		
 	var heal_threshold := 100
 	var item_pool := []
-	for item in InventoryGlobal.items:
+	for item in InventoryGlobal.items.values():
 		if get_heal_amount(item["item_effect"]) >= heal_threshold:
 			item_pool.append(item)
 

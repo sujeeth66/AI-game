@@ -49,11 +49,11 @@ func handle_dialog_choice(option):
 		npc.set_dialog_state("start")
 		hide_dialog()
 	elif next_state == "offer_quests":
-		if npc.dialog_resource.get_npc_dialog(npc.npc_id)[npc.current_branch_index]["branch_id"] == "npc_default":
+		var current_branch_id = npc.dialog_resource.get_npc_dialog(npc.npc_id)[npc.current_branch_index]["branch_id"]
+		if current_branch_id == "npc_default":
 			offer_remaining_quests()
 		else:
-			offer_quests(npc.dialog_resource.get_npc_dialog(npc.npc_id)[npc.current_branch_index]["branch_id"])
-		#npc.set_dialog_state("give_quests")
+			offer_quests(current_branch_id)
 		show_dialog(npc)
 	else:
 		show_dialog(npc)

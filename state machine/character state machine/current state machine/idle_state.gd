@@ -12,8 +12,6 @@ func enter():
 	print("Entered idle state")
 
 func handle_input(event: InputEvent):
-	print(event)
-		
 	# Check for dash input
 	if Input.is_action_pressed("dash") and character.has_stamina(character.STAMINA_DASH_COST):
 		state_machine.change_state("dashstate")

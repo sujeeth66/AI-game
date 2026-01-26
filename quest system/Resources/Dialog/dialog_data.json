@@ -1,184 +1,4 @@
 {
-	"npc_1": {
-		"trees": [
-			{
-				"branch_id": "npc_1_1",
-				"dialogs": [
-					{
-						"options": {
-							"Ask About Town": "in_progress",
-							"Receive Quests": "give_quests",
-							"Say Goodbye": "exit"
-						},
-						"state": "start",
-						"text": "Hello, adventurer! What do you need?"
-					},
-					{
-						"options": {
-							"Go Back": "start",
-							"Say Goodbye": "end"
-						},
-						"state": "in_progress",
-						"text": "This town is known for its beautiful gardens and not so friendly NPC's."
-					},
-					{
-						"options": {
-							"Go Back": "start",
-							"Say Goodbye": "exit"
-						},
-						"state": "give_quests",
-						"text": "Sure! If I have anything, you can find it in your Quest Log."
-					},
-					{
-						"options": {
-
-						},
-						"state": "end",
-						"text": "Goodbye, adventurer!"
-					},
-					{
-						"options": {
-
-						},
-						"state": "exit",
-						"text": "Come back soon adventurer!"
-					}
-				]
-			},
-			{
-				"branch_id": "npc_1_2",
-				"dialogs": [
-					{
-						"options": {
-							"Continue Asking About Town": "in_progress",
-							"Receive Quests": "give_quests",
-							"Say Goodbye": "exit"
-						},
-						"state": "start",
-						"text": "Hey adventurer! Back so soon?"
-					},
-					{
-						"options": {
-							"Go Back": "start",
-							"Say Goodbye": "end"
-						},
-						"state": "in_progress",
-						"text": "I heard that Carl over there makes a mean cat-eye soup."
-					},
-					{
-						"options": {
-							"Go Back": "start",
-							"Say Goodbye": "exit"
-						},
-						"state": "give_quests",
-						"text": "Sure! If I have anything, you can find it in your Quest Log."
-					},
-					{
-						"options": {
-
-						},
-						"state": "end",
-						"text": "Goodbye, adventurer!"
-					},
-					{
-						"options": {
-
-						},
-						"state": "exit",
-						"text": "Come back soon!"
-					}
-				]
-			},
-			{
-				"branch_id": "npc_default",
-				"dialogs": [
-					{
-						"options": {
-							"Receive Quests": "give_quests",
-							"Say Goodbye": "exit"
-						},
-						"state": "start",
-						"text": "Hey adventurer! Thanks again for helping me."
-					},
-					{
-						"options": {
-							"Go Back": "start"
-						},
-						"state": "give_quests",
-						"text": "Sure! If I have anything, you can find it in your Quest Log."
-					}
-				]
-			}
-		]
-	},
-	"npc_2": {
-		"trees": [
-			{
-				"branch_id": "npc_2_1",
-				"dialogs": [
-					{
-						"options": {
-							"Ask About Forest": "in_progress",
-							"Receive Quests": "give_quests",
-							"Say Goodbye": "exit"
-						},
-						"state": "start",
-						"text": "Greetings, traveler! How can I assist you?"
-					},
-					{
-						"options": {
-							"Go Back": "start",
-							"Say Goodbye": "end"
-						},
-						"state": "in_progress",
-						"text": "The forest is home to many mystical creatures."
-					},
-					{
-						"options": {
-							"Go Back": "start",
-							"Say Goodbye": "exit"
-						},
-						"state": "give_quests",
-						"text": "Okay. I've updated your quest log with things I need done."
-					},
-					{
-						"options": {
-
-						},
-						"state": "end",
-						"text": "Farewell, traveler!"
-					},
-					{
-						"options": {
-
-						},
-						"state": "exit",
-						"text": "Come back soon!"
-					}
-				]
-			},
-			{
-				"branch_id": "npc_default",
-				"dialogs": [
-					{
-						"options": {
-							"Receive Quests": "give_quests",
-							"Say Goodbye": "exit"
-						},
-						"state": "start",
-						"text": "I wonder why Bobby is always smelling me..."
-					},
-					{
-						"options": {
-							"Go Back": "start"
-						},
-						"state": "give_quests",
-						"text": "Okay. I've updated your quest log with things I need done."
-					}
-				]
-			}
-		]
-	},
 	"npc_demo_alchemist": {
 		"name": "Alchemist",
 		"trees": [
@@ -186,19 +6,118 @@
 				"branch_id": "npc_default",
 				"dialogs": [
 					{
-						"options": {
-							"No": "exit",
-							"Sure": "offer_quests"
-						},
 						"state": "start",
-						"text": "Greetings! Care to help the alchemist?"
+						"text": "Greetings, adventurer! I'm working on important experiments and could use your help.",
+						"options": {
+							"What do you need?": "offer_quest",
+							"Tell me about your work": "about_work",
+							"Goodbye": "exit"
+						}
 					},
 					{
+						"state": "about_work",
+						"text": "I study rare magical ingredients. Currently researching slime gel properties - fascinating stuff!",
 						"options": {
-							"Okay": "exit"
-						},
-						"state": "offer_quests",
-						"text": "Bring me 3 Slime Gels."
+							"Sounds interesting": "offer_quest",
+							"Maybe another time": "start",
+							"Goodbye": "exit"
+						}
+					},
+					{
+						"state": "offer_quest",
+						"text": "I need 3 Slime Gels for my experiments. Can you collect them for me?",
+						"options": {
+							"I'll help you": "accept_quest",
+							"Not right now": "start",
+							"Goodbye": "exit"
+						}
+					},
+					{
+						"state": "accept_quest",
+						"text": "Excellent! The slimes are usually found in the forest area. Return when you have the gel.",
+						"options": {
+							"I'll be back": "exit"
+						}
+					},
+					{
+						"state": "exit",
+						"text": "Safe travels, adventurer!",
+						"options": {}
+					}
+				]
+			},
+			{
+				"branch_id": "quest_in_progress",
+				"dialogs": [
+					{
+						"state": "start",
+						"text": "Hello again! Have you collected those 3 Slime Gels for my experiment yet?",
+						"options": {
+							"Still working on it": "encourage",
+							"Where can I find slimes again?": "reminder",
+							"I need to go": "exit"
+						}
+					},
+					{
+						"state": "encourage",
+						"text": "No rush, but I'm quite eager to begin my research. The forest area is your best bet!",
+						"options": {
+							"I'll hurry": "exit"
+						}
+					},
+					{
+						"state": "reminder",
+						"text": "Check the forest areas to the east. Slimes are most active there. Remember, you need 3 gels total!",
+						"options": {
+							"Thanks for the reminder": "exit"
+						}
+					},
+					{
+						"state": "exit",
+						"text": "Good luck with your hunting!",
+						"options": {}
+					}
+				]
+			},
+			{
+				"branch_id": "post_quest_completion",
+				"dialogs": [
+					{
+						"state": "start",
+						"text": "Ah, there you are! And with the slime gel! Thank you so much for your help.",
+						"options": {
+							"Glad I could help": "quest_complete",
+							"What was this for?": "explain_experiment",
+							"Do you have more work?": "check_more_quests"
+						}
+					},
+					{
+						"state": "quest_complete",
+						"text": "Your reward has been delivered! The slime gel will help me create a powerful healing potion.",
+						"options": {
+							"A healing potion?": "explain_experiment",
+							"Goodbye": "exit"
+						}
+					},
+					{
+						"state": "explain_experiment",
+						"text": "Yes! When combined with rare herbs, slime gel creates remarkable restorative properties. This could help many injured adventurers!",
+						"options": {
+							"That's amazing": "quest_complete",
+							"Goodbye": "exit"
+						}
+					},
+					{
+						"state": "check_more_quests",
+						"text": "I might have more tasks soon, but for now I need to focus on this experiment. Check back in a day or two.",
+						"options": {
+							"I will": "exit"
+						}
+					},
+					{
+						"state": "exit",
+						"text": "Thank you again for your assistance. Visit anytime!",
+						"options": {}
 					}
 				]
 			}

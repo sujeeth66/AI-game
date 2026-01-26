@@ -205,7 +205,7 @@ func drop_items() -> void:
 	
 	# Find the item in InventoryGlobal
 	var item_data = null
-	for item in InventoryGlobal.items:
+	for item in InventoryGlobal.items.values():
 		if item.get("item_name") == drop_item_name:
 			item_data = item
 			break

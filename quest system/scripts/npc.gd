@@ -26,9 +26,8 @@ func _ready():
 	# Initialize quest manager reference
 	
 func start_dialog():
-	var npc_dialogs = dialog_resource.get_npc_dialog(npc_id)
-	if npc_dialogs.is_empty():
-		return
+	var appropriate_branch = get_appropriate_branch_index()
+	set_dialog_tree(appropriate_branch)
 	dialog_manager.show_dialog(self)
 
 # Get current branch dialog
@@ -69,3 +68,39 @@ func get_quest_dialog() -> Dictionary:
 					quest_manager.update_quest(quest.quest_id, "completed")
 				return {"text": objective.objective_dialog, "options": {"Continue": "exit"}}
 	return {"text": "", "options": {}}
+
+func get_appropriate_branch_index() -> int:
+	var npc_dialogs = dialog_resource.get_npc_dialog(npc_id)
+	if npc_dialogs.is_empty():
+		return 0
+	
+	# Check for completed quests first (highest priority)
+	for quest in quests:
+		if quest.state == "completed":
+			var completed_branch = find_branch_by_id("post_quest_completion")
+			if completed_branch != -1:
+				return completed_branch
+	
+	# Check for in-progress quests
+	for quest in quests:
+		if quest.state == "in_progress":
+			var progress_branch = find_branch_by_id("quest_in_progress")
+			if progress_branch != -1:
+				return progress_branch
+	
+	# Check for not started quests
+	for quest in quests:
+		if quest.state == "not_started":
+			var default_branch = find_branch_by_id("npc_default")
+			if default_branch != -1:
+				return default_branch
+	
+	# Fallback to first available branch
+	return 0
+
+func find_branch_by_id(branch_id: String) -> int:
+	var npc_dialogs = dialog_resource.get_npc_dialog(npc_id)
+	for i in range(npc_dialogs.size()):
+		if npc_dialogs[i].has("branch_id") and npc_dialogs[i]["branch_id"] == branch_id:
+			return i
+	return -1

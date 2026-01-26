@@ -4,7 +4,7 @@ extends Node2D
 @export var item_quantity = 1
 @export var item_type = ""
 @export var item_name = ""
-@export var item_texture : Texture
+@export var item_texture: CompressedTexture2D
 @export var item_effect = ""
 var scene_path = "res://inventory/scenes/game_item.tscn"
 @onready var item_sprite: Sprite2D = $Sprite2D
@@ -25,21 +25,11 @@ func _process(delta: float) -> void:
 	if player_in_range and Input.is_action_just_pressed("interact"):
 		pickup_item(item_quantity)
 		
-
-func pickup_item(item_quantity):
-	var item = {
-		"quantity" : item_quantity,
-		"item_type" : item_type,
-		"item_name" : item_name,
-		"item_texture" : item_texture,
-		"item_effect" : item_effect,
-		"scene_path" : scene_path
-	}
-	
+func pickup_item(item_quantity: int) -> void:
+	var item = Item.new(item_name, item_type, item_effect, item_texture, item_quantity, scene_path)
 	if Global.player:
-		InventoryGlobal.add_item(item,false)
+		InventoryGlobal.add_item(item, false)
 		self.queue_free()
-
 
 func _on_area_2d_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
@@ -51,13 +41,13 @@ func _on_area_2d_body_exited(body: Node2D) -> void:
 		player_in_range = false
 		body.inventory_canvas.visible = false
 		
-func set_item_data(data):
-		item_type = data["item_type"]
-		item_name = data["item_name"]
-		item_texture = data["item_texture"]
-		item_effect = data["item_effect"]
-
-func initiate_items(quantity,name, type, effect, texture):
+func set_item_data(data: Item) -> void:
+	item_type = data.item_type
+	item_name = data.item_name
+	item_texture = data.item_texture
+	item_effect = data.item_effect
+ 
+func initiate_items(quantity: int, name: String, type: String, effect: String, texture: Texture) -> void:
 	item_quantity = quantity
 	item_name = name
 	item_type = type

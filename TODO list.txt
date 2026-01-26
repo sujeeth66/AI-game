@@ -1,0 +1,1 @@
+implement a parameter for each quest to indicate which character will offer each quest
