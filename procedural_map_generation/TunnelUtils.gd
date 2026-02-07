@@ -36,8 +36,8 @@ static func find_min_surface_tunnel_distance(grid: Array, map_width: int, map_he
 	for x in range(5, map_width - 5):
 		var surface_bottom := -1
 		var tunnel_top := -1
-
-		for y in range(map_height - 1, 0, -1):
+		
+		for y in range(map_height - 5, 0, -1):
 			if surface_bottom == -1 and grid[y][x] == 1 and grid[y + 1][x] == 0:
 				surface_bottom = y
 			elif surface_bottom != -1 and tunnel_top == -1 and grid[y][x] == 0 and grid[y + 1][x] == 1:

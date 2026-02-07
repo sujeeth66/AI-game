@@ -186,10 +186,10 @@ async def place_npc(request: Request):
     
     # Placeholder placement data
     # For demo, place at x=200 if available
-    placement_x = 150
+    placement_x = 5
     if map_width > 0:
         # Could use AI to determine best placement based on terrain
-        placement_x = min(150, map_width - 50)
+        placement_x = min(5, map_width - 50)
     
     response = {
         "placement_x": placement_x,

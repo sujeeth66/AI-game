@@ -18,6 +18,7 @@ var min_distance = 100
 var best_pos
 var terrain_change = []
 var rooms := {}
+var all_room_tiles := {}
 var next_room_id := 0
 var level_plan = {
 	"surface": {
@@ -35,9 +36,9 @@ var level_plan = {
 	}
 }
 var city_segments = [
-	{ "type": "road", "length": 50, "height":65 },
+	{ "type": "road", "length": 50, "height":35 },
 	{ "type": "building", "length": 10, "height":20 },
-	{ "type": "road", "length": 40, "height":50 }
+	{ "type": "road", "length": 40, "height":30 }
 ]
 
 const GridUtils = preload("res://procedural_map_generation/GridUtils.gd")
@@ -192,7 +193,12 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 		
 		var last_entrance_x = 0
 		var closest_pos = TunnelUtils.find_min_surface_tunnel_distance(map_grid, map_width, map_height)
-		var spawn_pos = find_valid_spawn(map_grid, closest_pos.x, map_height)
+		var spawn_pos = find_valid_spawn(map_grid,closest_pos.x,map_height)
+		for x in range(1):
+			for y in range(1):
+				tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(0, 4))
+				tilemap.set_cell(Vector2i(closest_pos.x,150-closest_pos.y), 0, Vector2i(5, 4))
+
 		var previous_tunnel_path = null
 		for i in range(tunnel_paths.size() - 1, -1, -1):
 			var tunnel_path = tunnel_paths[i]
@@ -215,42 +221,14 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 		if ug["room_shape"] == "flat":
 			ItemSpawner.spawn_boss_reward(tilemap,items,map_grid,map_width,map_height,ug["tunnels"])
 		else:
-			var all_room_tiles := {}
+			
 			for tunnel_path in tunnel_paths:
 				var room_tiles = TunnelRooms.generate_tunnel_rooms(map_grid, tunnel_path, map_width, map_height, seed)
 				for key in room_tiles.keys():
 					all_room_tiles[key + all_room_tiles.size()] = room_tiles[key]
 			
-			RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
-			merge_connected_rooms(rooms)
-			
-		var distance_result = RoomAnalyzer.flood_fill_distance(map_grid, Vector2i(spawn_pos.x, map_height - spawn_pos.y))
-		var distance_map = distance_result["map"]
-		#ItemSpawner.spawn_items_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
-		# Spawn chests in rooms instead of individual items
-		ItemSpawner.spawn_chests_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
-		#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
-		#print("Processed ",processed_rooms," rooms, skipped ",skipped_rooms," rooms")
-		#print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_valid,")")
-		for x in range(1):
-			for y in range(1):
-				tilemap.set_cell(spawn_pos + Vector2i(x,y), 0, Vector2i(0, 4))
-				tilemap.set_cell(Vector2i(closest_pos.x,150-closest_pos.y), 0, Vector2i(5, 4))
-
 	GridUtils.enclose_grid(map_grid, map_width, map_height)
-	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
 	
-	# After map generation is complete
-	var spawn_pos = find_player_spawn_position()
-	#spawn_player(spawn_pos)
-	
-	for i in terrain_change:
-		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
-		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
-		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
-		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
-		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
-		
 	# Build global surface_tiles array
 	Global.surface_tiles.clear()
 	for x in range(map_width):
@@ -264,6 +242,30 @@ func _on_ai_response_received(result: int, response_code: int, headers: PackedSt
 			Global.surface_tiles.append(Vector2i(x, -1))  # or skip or null as preferred
 	print("[main.gd] surface_tiles array generated, sample:", Global.surface_tiles.slice(0,10))
 	
+	
+	# After map generation is complete
+	var spawn_pos = find_player_spawn_position(Global.surface_tiles,"start")
+	
+	RoomAnalyzer.analyze_and_decorate_rooms(map_grid, all_room_tiles, Vector2i(spawn_pos.x,map_height - spawn_pos.y),rooms,next_room_id)
+	merge_connected_rooms(rooms)
+	var distance_result = RoomAnalyzer.flood_fill_distance(map_grid, Vector2i(spawn_pos.x, map_height - spawn_pos.y))
+	var distance_map = distance_result["map"]
+	#ItemSpawner.spawn_items_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
+	# Spawn chests in rooms instead of individual items
+	ItemSpawner.spawn_chests_in_rooms(rooms, distance_map, tilemap, items, map_grid, map_width, map_height)
+	#await visualize_flood_fill_wave_fast(tilemap, map_grid, Vector2i(spawn_pos.x,map_height - spawn_pos.y))
+	#print("Processed ",processed_rooms," rooms, skipped ",skipped_rooms," rooms")
+	#print("Room ",room.id," at ",room.center," distance: ",room.distance ,"tier: ",tier,"(",i+1,"/",total_valid,")")
+	TilemapDraw.draw_grid_to_tilemap(tilemap, map_grid, map_width, map_height)
+	spawn_player(spawn_pos)
+	
+	for i in terrain_change:
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		tilemap.set_cell(spawn_pos,0,Vector2i(0,9))
+		
 	print("[main.gd] Emitting map_generation_finished!")
 	emit_signal("map_generation_finished")
 	
@@ -429,22 +431,46 @@ func tier_index(tier: String) -> int:
 	var tier_order = ["common", "rare", "epic"]
 	return tier_order.find(tier)
 
-func find_player_spawn_position() -> Vector2:
-	var start_x = 10  # Start a bit right of the edge
-	var surface_y = 0
-	
-	# Find the first solid block from the top at start_x
-	for y in range(0, map_height):
-		if map_grid[start_x][y] == 1:  # Assuming 1 is a solid block
-			surface_y = y - 1  # Position above the surface
-			break
-	
-	# If no surface found, use a default position
-	if surface_y <= 0:
-		surface_y = surface_height - 5  # Default position near the surface
+func find_player_spawn_position(surface_tiles: Array, position_type: String = "start") -> Vector2i:
+	if surface_tiles.is_empty():
+		print("No surface tiles available, using fallback")
+		return Vector2i(10, 0)
 		
-	return Vector2(start_x * tilemap.tile_set.tile_size.x, 
-				  surface_y * tilemap.tile_set.tile_size.y)
+	var selected_tile: Vector2i
+	var map_width = surface_tiles.size()
+	print("-----------------------------------------------------------------\n",surface_tiles)
+	match position_type:
+		"start":
+			# Use first 25% of the map
+			var end_x = int(map_width * 0.25)
+			var start_tiles = surface_tiles.filter(func(tile): return tile.x < end_x and tile.x > 15)
+			if start_tiles.is_empty():
+				selected_tile = surface_tiles[0]
+			else:
+				selected_tile = start_tiles[randi() % start_tiles.size()]
+		"end":
+			# Use last 25% of the map
+			var start_x = int(map_width * 0.75)
+			var end_tiles = surface_tiles.filter(func(tile): return tile.x >= start_x)
+			if end_tiles.is_empty():
+				selected_tile = surface_tiles[-1]
+			else:
+				selected_tile = end_tiles[randi() % end_tiles.size()]
+		"middle":
+			# Use middle 50% of the map
+			var start_x = int(map_width * 0.25)
+			var end_x = int(map_width * 0.75)
+			var middle_tiles = surface_tiles.filter(func(tile): return tile.x >= start_x and tile.x < end_x)
+			if middle_tiles.is_empty():
+				selected_tile = surface_tiles[surface_tiles.size() / 2]
+			else:
+				selected_tile = middle_tiles[randi() % middle_tiles.size()]
+		_:
+			# Default: use any valid tile
+			selected_tile = surface_tiles[randi() % surface_tiles.size()]
+ 
+	print("Spawn position selected: ", selected_tile, " (type: ", position_type, ")")
+	return selected_tile
 
 func spawn_player(position: Vector2):
 	if player_scene:

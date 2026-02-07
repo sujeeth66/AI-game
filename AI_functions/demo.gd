@@ -19,6 +19,16 @@ var npc_data = null
 var item_data = null
 var placement_data = null
 
+# Retry configuration
+var max_retries = 3
+var retry_delay = 1.0  # seconds
+
+# Retry counters
+var quest_retry_count = 0
+var npc_retry_count = 0
+var item_retry_count = 0
+var placement_retry_count = 0
+
 func _ready() -> void:
 	print("[demo.gd] _ready() running!")
 	
@@ -91,28 +101,52 @@ func request_quest_generation():
 func _on_quest_generated(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("[demo.gd] Quest response received - Result: ", result, " Code: ", response_code)
 	
-	if result != HTTPRequest.RESULT_SUCCESS:
-		push_error("[demo.gd] Quest generation request failed: ", response_code)
-		return
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		quest_retry_count += 1
+		if quest_retry_count < max_retries:
+			print("[demo.gd] Quest generation failed, retrying... (attempt ", quest_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_quest_generation()
+			return
+		else:
+			push_error("[demo.gd] Quest generation failed after ", max_retries, " attempts: ", response_code)
+			# Continue with demo fallback
+			use_demo_quest_data()
+			return
 	
 	# Log the raw response for debugging
 	var raw_response = body.get_string_from_utf8()
 	print("[demo.gd] Raw quest response: ", raw_response)
 	
 	if raw_response.is_empty():
-		push_error("[demo.gd] Empty response from quest endpoint")
-		return
+		quest_retry_count += 1
+		if quest_retry_count < max_retries:
+			print("[demo.gd] Empty quest response, retrying... (attempt ", quest_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_quest_generation()
+			return
+		else:
+			push_error("[demo.gd] Empty quest response after ", max_retries, " attempts")
+			use_demo_quest_data()
+			return
 	
 	var json = JSON.new()
 	var parse_error = json.parse(raw_response)
 	if parse_error != OK:
-		push_error("[demo.gd] Failed to parse quest JSON. Error code: ", parse_error)
-		push_error("[demo.gd] Error message: ", json.get_error_message())
-		push_error("[demo.gd] Error line: ", json.get_error_line())
-		return
+		quest_retry_count += 1
+		if quest_retry_count < max_retries:
+			print("[demo.gd] Failed to parse quest JSON, retrying... (attempt ", quest_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_quest_generation()
+			return
+		else:
+			push_error("[demo.gd] Failed to parse quest JSON after ", max_retries, " attempts. Error code: ", parse_error)
+			use_demo_quest_data()
+			return
 	
 	quest_data = json.get_data()
 	print("[demo.gd] Quest generated: ", quest_data.get("quest_name"))
+	quest_retry_count = 0  # Reset counter on success
 	
 	# Now request item generation for quest objectives
 	request_item_generation()
@@ -149,27 +183,50 @@ func request_item_generation():
 func _on_item_generated(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("[demo.gd] Item response received - Result: ", result, " Code: ", response_code)
 	
-	if result != HTTPRequest.RESULT_SUCCESS:
-		push_error("[demo.gd] Item generation request failed: ", response_code)
-		return
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		item_retry_count += 1
+		if item_retry_count < max_retries:
+			print("[demo.gd] Item generation failed, retrying... (attempt ", item_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_item_generation()
+			return
+		else:
+			push_error("[demo.gd] Item generation failed after ", max_retries, " attempts: ", response_code)
+			use_demo_item_data()
+			return
 	
 	var raw_response = body.get_string_from_utf8()
 	print("[demo.gd] Raw item response: ", raw_response)
 	
 	if raw_response.is_empty():
-		push_error("[demo.gd] Empty response from item endpoint")
-		return
+		item_retry_count += 1
+		if item_retry_count < max_retries:
+			print("[demo.gd] Empty item response, retrying... (attempt ", item_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_item_generation()
+			return
+		else:
+			push_error("[demo.gd] Empty item response after ", max_retries, " attempts")
+			use_demo_item_data()
+			return
 	
 	var json = JSON.new()
 	var parse_error = json.parse(raw_response)
 	if parse_error != OK:
-		push_error("[demo.gd] Failed to parse item JSON. Error code: ", parse_error)
-		push_error("[demo.gd] Error message: ", json.get_error_message())
-		push_error("[demo.gd] Error line: ", json.get_error_line())
-		return
+		item_retry_count += 1
+		if item_retry_count < max_retries:
+			print("[demo.gd] Failed to parse item JSON, retrying... (attempt ", item_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_item_generation()
+			return
+		else:
+			push_error("[demo.gd] Failed to parse item JSON after ", max_retries, " attempts. Error code: ", parse_error)
+			use_demo_item_data()
+			return
 	
 	item_data = json.get_data()
 	print("[demo.gd] Item generated: ", item_data.get("item_name"))
+	item_retry_count = 0  # Reset counter on success
 	
 	# Create item in InventoryGlobal if it doesn't exist
 	create_item_if_not_exists()
@@ -291,27 +348,50 @@ func request_npc_generation():
 
 func _on_npc_generated(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("[demo.gd] NPC response received - Result: ", result, " Code: ", response_code)
-	if result != HTTPRequest.RESULT_SUCCESS:
-		push_error("[demo.gd] NPC generation request failed: ", response_code)
-		return
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		npc_retry_count += 1
+		if npc_retry_count < max_retries:
+			print("[demo.gd] NPC generation failed, retrying... (attempt ", npc_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_npc_generation()
+			return
+		else:
+			push_error("[demo.gd] NPC generation failed after ", max_retries, " attempts: ", response_code)
+			use_demo_npc_data()
+			return
 	
 	var raw_response = body.get_string_from_utf8()
 	print("[demo.gd] Raw NPC response: ", raw_response)
 	
 	if raw_response.is_empty():
-		push_error("[demo.gd] Empty response from NPC endpoint")
-		return
+		npc_retry_count += 1
+		if npc_retry_count < max_retries:
+			print("[demo.gd] Empty NPC response, retrying... (attempt ", npc_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_npc_generation()
+			return
+		else:
+			push_error("[demo.gd] Empty NPC response after ", max_retries, " attempts")
+			use_demo_npc_data()
+			return
 
 	var json = JSON.new()
 	var parse_error = json.parse(raw_response)
 	if parse_error != OK:
-		push_error("[demo.gd] Failed to parse NPC JSON. Error code: ", parse_error)
-		push_error("[demo.gd] Error message: ", json.get_error_message())
-		push_error("[demo.gd] Error line: ", json.get_error_line())
-		return
+		npc_retry_count += 1
+		if npc_retry_count < max_retries:
+			print("[demo.gd] Failed to parse NPC JSON, retrying... (attempt ", npc_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_npc_generation()
+			return
+		else:
+			push_error("[demo.gd] Failed to parse NPC JSON after ", max_retries, " attempts. Error code: ", parse_error)
+			use_demo_npc_data()
+			return
 	
 	npc_data = json.get_data()
 	print("[demo.gd] NPC generated: ", npc_data.get("npc_name"))
+	npc_retry_count = 0  # Reset counter on success
 	
 	# Now request placement
 	request_npc_placement()
@@ -332,27 +412,50 @@ func request_npc_placement():
 
 func _on_placement_generated(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("[demo.gd] Placement response received - Result: ", result, " Code: ", response_code)
-	if result != HTTPRequest.RESULT_SUCCESS:
-		push_error("[demo.gd] Placement request failed: ", response_code)
-		return
+	if result != HTTPRequest.RESULT_SUCCESS or response_code != 200:
+		placement_retry_count += 1
+		if placement_retry_count < max_retries:
+			print("[demo.gd] Placement generation failed, retrying... (attempt ", placement_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_npc_placement()
+			return
+		else:
+			push_error("[demo.gd] Placement generation failed after ", max_retries, " attempts: ", response_code)
+			use_demo_placement_data()
+			return
 	
 	var raw_response = body.get_string_from_utf8()
 	print("[demo.gd] Raw placement response: ", raw_response)
 	
 	if raw_response.is_empty():
-		push_error("[demo.gd] Empty response from placement endpoint")
-		return
+		placement_retry_count += 1
+		if placement_retry_count < max_retries:
+			print("[demo.gd] Empty placement response, retrying... (attempt ", placement_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_npc_placement()
+			return
+		else:
+			push_error("[demo.gd] Empty placement response after ", max_retries, " attempts")
+			use_demo_placement_data()
+			return
 	
 	var json = JSON.new()
 	var parse_error = json.parse(raw_response)
 	if parse_error != OK:
-		push_error("[demo.gd] Failed to parse placement JSON. Error code: ", parse_error)
-		push_error("[demo.gd] Error message: ", json.get_error_message())
-		push_error("[demo.gd] Error line: ", json.get_error_line())
-		return
+		placement_retry_count += 1
+		if placement_retry_count < max_retries:
+			print("[demo.gd] Failed to parse placement JSON, retrying... (attempt ", placement_retry_count, "/", max_retries, ")")
+			await get_tree().create_timer(retry_delay).timeout
+			request_npc_placement()
+			return
+		else:
+			push_error("[demo.gd] Failed to parse placement JSON after ", max_retries, " attempts. Error code: ", parse_error)
+			use_demo_placement_data()
+			return
 	
 	placement_data = json.get_data()
 	print("[demo.gd] Placement determined at x=", placement_data.get("placement_x"))
+	placement_retry_count = 0  # Reset counter on success
 	
 	# Now we have all data, create and place the NPC
 	create_and_place_npc()
@@ -375,6 +478,10 @@ func create_and_place_npc():
 	# Build dialog trees from AI data
 	var dialog_trees = npc_data.get("dialog_trees", [])
 	print("[demo.gd] Using AI-generated dialog trees")
+	
+	# Fix AI dialog to use "start" as initial state instead of "opening"
+	dialog_trees = fix_ai_dialog_initial_state(dialog_trees)
+	print("[demo.gd] Fixed AI dialog initial state")
 	
 	# Create NPC from scene
 	var npc_scene: PackedScene = load("res://quest system/scenes/NPC.tscn")
@@ -426,3 +533,110 @@ func create_and_place_npc():
 		print("[demo.gd] Not placing NPC. npc=", npc, ", tilemap=", tilemap, ", map_height=", map_height)
 	
 	print("[demo.gd] AI-driven NPC generation pipeline complete!")
+
+func fix_ai_dialog_initial_state(dialog_trees: Array) -> Array:
+	"""Fix AI-generated dialog to use 'start' as initial state instead of 'opening'"""
+	var fixed_trees = []
+	
+	for tree in dialog_trees:
+		var fixed_tree = tree.duplicate(true)
+		
+		for dialog in fixed_tree.get("dialogs", []):
+			if dialog.get("state") == "opening":
+				dialog["state"] = "start"
+			
+			# Also fix common transition issues
+			var options = dialog.get("options", {})
+			for option_text in options.keys():
+				var next_state = options[option_text]
+				if next_state == "return":
+					options[option_text] = "exit"
+				elif next_state == "state_to_transition_to":
+					options[option_text] = "offer_quests"
+		
+		fixed_trees.append(fixed_tree)
+	
+	return fixed_trees
+
+# Fallback functions when AI endpoints fail
+func use_demo_quest_data():
+	print("[demo.gd] Using demo quest data as fallback")
+	quest_data = {
+		"quest_id": "quest_demo_collect",
+		"quest_name": "Collect Slime Gel",
+		"quest_description": "Gather 3 Slime Gels for the alchemist.",
+		"objectives": [
+			{
+				"id": "obj_collect_gel",
+				"description": "Collect 3 Slime Gel",
+				"objective_type": "collection",
+				"target_name": "Slime Gel",
+				"required_quantity": 3
+			}
+		],
+		"rewards": [
+			{
+				"reward_type": "coins",
+				"reward_amount": 75
+			}
+		]
+	}
+	quest_retry_count = 0
+	request_item_generation()
+
+func use_demo_item_data():
+	print("[demo.gd] Using demo item data as fallback")
+	item_data = {
+		"item_name": "Slime Gel",
+		"item_type": "quest_item",
+		"item_effect": "none",
+		"item_texture_path": "res://textures/slime_gel.png",
+		"spawn_count": 25,
+		"drop_rate": 0.8,
+		"description": "A sticky gel extracted from slimes. Used in various alchemical recipes."
+	}
+	item_retry_count = 0
+	create_item_if_not_exists()
+	request_npc_generation()
+
+func use_demo_npc_data():
+	print("[demo.gd] Using demo NPC data as fallback")
+	npc_data = {
+		"npc_id": "npc_demo_alchemist",
+		"npc_name": "Alchemist",
+		"npc_type": "quest_giver",
+		"dialog_trees": [
+			{
+				"branch_id": "npc_default",
+				"dialogs": [
+					{
+						"state": "start",
+						"text": "Greetings! Care to help the alchemist?",
+						"options": {
+							"Sure": "offer_quests",
+							"No": "exit"
+						}
+					},
+					{
+						"state": "offer_quests",
+						"text": "Bring me 3 Slime Gels.",
+						"options": {
+							"Okay": "exit"
+						}
+					}
+				]
+			}
+		]
+	}
+	npc_retry_count = 0
+	request_npc_placement()
+
+func use_demo_placement_data():
+	print("[demo.gd] Using demo placement data as fallback")
+	placement_data = {
+		"placement_x": 5,
+		"placement_strategy": "surface_spawn",
+		"reasoning": "Placed near starting area for easy access"
+	}
+	placement_retry_count = 0
+	create_and_place_npc()
