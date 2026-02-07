@@ -1,1 +1,2 @@
 implement a parameter for each quest to indicate which character will offer each quest
+we need to create the levels.since the stages are generated using AI responses for parameters and noise,after a map is created,we need to store the data in a file so that when we restart the game,we can choose our previous levels

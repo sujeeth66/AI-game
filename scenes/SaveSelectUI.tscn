@@ -1,0 +1,88 @@
+[gd_scene load_steps=2 format=3 uid="uid://c47e4nqap3end"]
+
+[ext_resource type="Script" uid="uid://bjigbp7110mu0" path="res://save_system/save_select_ui.gd" id="1_5b1ol"]
+
+[node name="SaveSelectUI" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_5b1ol")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 100
+
+[node name="spacer2" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 100
+
+[node name="spacer" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Slot1Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Slot1Button" type="Button" parent="HBoxContainer/VBoxContainer/Slot1Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot1Info" type="Label" parent="HBoxContainer/VBoxContainer/Slot1Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot1Delete" type="Button" parent="HBoxContainer/VBoxContainer/Slot1Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot2Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Slot2Button" type="Button" parent="HBoxContainer/VBoxContainer/Slot2Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot2Info" type="Label" parent="HBoxContainer/VBoxContainer/Slot2Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot2Delete" type="Button" parent="HBoxContainer/VBoxContainer/Slot2Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot3Container" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Slot3Button" type="Button" parent="HBoxContainer/VBoxContainer/Slot3Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot3Info" type="Label" parent="HBoxContainer/VBoxContainer/Slot3Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Slot3Delete" type="Button" parent="HBoxContainer/VBoxContainer/Slot3Container"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="spacer2" type="HBoxContainer" parent="HBoxContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="spacer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2

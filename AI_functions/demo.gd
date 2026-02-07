@@ -22,11 +22,18 @@ var placement_data = null
 func _ready() -> void:
 	print("[demo.gd] _ready() running!")
 	
-	# Create HTTP request nodes
+	# Create UNIQUE HTTP request nodes to avoid conflicts
 	http_quest = HTTPRequest.new()
+	http_quest.name = "DemoQuestHTTPRequest_" + str(get_instance_id())
+	
 	http_npc = HTTPRequest.new()
+	http_npc.name = "DemoNPCHTTPRequest_" + str(get_instance_id())
+	
 	http_item = HTTPRequest.new()
+	http_item.name = "DemoItemHTTPRequest_" + str(get_instance_id())
+	
 	http_placement = HTTPRequest.new()
+	http_placement.name = "DemoPlacementHTTPRequest_" + str(get_instance_id())
 	
 	add_child(http_quest)
 	add_child(http_npc)
@@ -63,6 +70,14 @@ func _on_map_ready():
 
 func request_quest_generation():
 	print("[demo.gd] Requesting quest generation from AI...")
+	
+	# Check if HTTPRequest is already busy
+	if http_quest.get_http_client_status() != HTTPClient.STATUS_DISCONNECTED:
+		print("[demo.gd] HTTPRequest is busy, waiting...")
+		await get_tree().create_timer(0.5).timeout
+		request_quest_generation()  # Retry after delay
+		return
+	
 	var payload = {
 		"context": "fantasy world with slimes",
 		"npc_type": "alchemist"
@@ -104,17 +119,26 @@ func _on_quest_generated(result: int, response_code: int, headers: PackedStringA
 
 func request_item_generation():
 	print("[demo.gd] Requesting item generation from AI...")
+	
+	# Check if HTTPRequest is already busy
+	if http_item.get_http_client_status() != HTTPClient.STATUS_DISCONNECTED:
+		print("[demo.gd] Item HTTPRequest is busy, waiting...")
+		await get_tree().create_timer(0.5).timeout
+		request_item_generation()  # Retry after delay
+		return
+	
 	# Get the first collection objective's target
 	var objectives = quest_data.get("objectives", [])
 	var target_item = "Slime Gel"
 	for obj in objectives:
-		if obj.get("objective_type") == "collection":
-			target_item = obj.get("target_name", "Slime Gel")
+		if obj.get("type") == "collect":
+			target_item = obj.get("target", "Slime Gel")
 			break
 	
 	var payload = {
 		"item_name": target_item,
-		"context": "quest item needed for alchemist"
+		"item_type": "quest_item",
+		"rarity": "common"
 	}
 	var headers = ["Content-Type: application/json"]
 	var body = JSON.stringify(payload)
@@ -247,6 +271,14 @@ func spawn_items_on_map():
 
 func request_npc_generation():
 	print("[demo.gd] Requesting NPC generation from AI...")
+	
+	# Check if HTTPRequest is already busy
+	if http_npc.get_http_client_status() != HTTPClient.STATUS_DISCONNECTED:
+		print("[demo.gd] NPC HTTPRequest is busy, waiting...")
+		await get_tree().create_timer(0.5).timeout
+		request_npc_generation()  # Retry after delay
+		return
+	
 	var payload = {
 		"context": "needs to give quest about collecting slime gel",
 		"location": "forest area"

@@ -3,7 +3,6 @@ extends Node2D
 @onready var tilemap := $TileMapLayer
 @onready var items : Node2D = $Items
 #@onready var item_spawner = $ItemSpawner  # Make sure ItemSpawner is a child node
-@onready var http_request := $HTTPRequest
 @onready var ai_map_generator = preload("res://procedural_map_generation/AIMapGenerator.gd").new()
 @onready var player_scene = preload("res://scenes/player.tscn")
 
@@ -54,6 +53,31 @@ const MapGen = preload("res://procedural_map_generation/MapGeneration.gd")
 signal map_generation_finished
 
 func _ready():
+	# Don't start immediately - wait for save system
+	pass
+
+func start_map_generation_from_save(game_data: Dictionary = {}):
+	print("Starting map generation with save data: ", game_data)
+	
+	# Use saved map data if available, otherwise generate new
+	if game_data.has("map_data"):
+		var map_data = game_data["map_data"]
+		seed = map_data.get("seed", 12345)
+		map_width = map_data.get("width", 800)
+		map_height = map_data.get("height", 600)
+		
+		# Use saved level plan if available
+		if map_data.has("level_plan"):
+			level_plan = map_data["level_plan"]
+	
+	# Set global variables
+	Global.map_height = map_height
+	Global.map_width = map_width
+	
+	# Start the actual map generation
+	actually_start_generation()
+
+func actually_start_generation():
 	tilemap.clear()
 	
 	# Add the AI map generator to the scene tree
@@ -63,17 +87,19 @@ func _ready():
 		await ready
 	add_child(ai_map_generator)
 	
-	# Add the HTTP request node if not already added
-	if not has_node("HTTPRequest"):
-		add_child(http_request)
+	# Create a SEPARATE HTTPRequest for map generation (not the save system one)
+	var map_http_request = HTTPRequest.new()
+	map_http_request.name = "MapHTTPRequest"
+	add_child(map_http_request)
 	
 	# Connect the signal if not already connected
-	if not http_request.request_completed.is_connected(_on_ai_response_received):
-		http_request.request_completed.connect(_on_ai_response_received)
+	if not map_http_request.request_completed.is_connected(_on_ai_response_received):
+		map_http_request.request_completed.connect(_on_ai_response_received)
 	
-	# Generate level from AI
+	# Generate level from AI with the SEPARATE HTTPRequest
 	var lore = "Generate a diverse fantasy landscape with various biomes and interesting features."
-	ai_map_generator.generate_map_from_lore(lore, http_request)
+	ai_map_generator.generate_map_from_lore(lore, map_http_request)
+
 	
 func _on_ai_response_received(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray):
 	print("\n=== AI Response Received ===")

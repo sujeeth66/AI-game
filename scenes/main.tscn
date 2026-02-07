@@ -1,20 +1,32 @@
-[gd_scene load_steps=6 format=3 uid="uid://dile8xc6cko2r"]
+[gd_scene load_steps=8 format=3 uid="uid://dile8xc6cko2r"]
 
 [ext_resource type="Script" uid="uid://q70xqq4ntmrv" path="res://procedural_map_generation/main.gd" id="1_eb6dy"]
 [ext_resource type="Script" uid="uid://cf2ymk4dbdvek" path="res://scripts/camera.gd" id="2_85g3d"]
+[ext_resource type="Script" uid="uid://cqvrsn146ur08" path="res://save_system/game_save_integration.gd" id="2_tefeu"]
 [ext_resource type="TileSet" uid="uid://b5w6h4x5y1w7f" path="res://textures/world.tres" id="3_eb6dy"]
 [ext_resource type="PackedScene" uid="uid://bfbwkogkdn0jn" path="res://scenes/player.tscn" id="3_h2yge"]
+[ext_resource type="PackedScene" uid="uid://c47e4nqap3end" path="res://scenes/SaveSelectUI.tscn" id="4_o6xl0"]
 [ext_resource type="Script" uid="uid://dg72emo61j37b" path="res://AI_functions/demo.gd" id="11_ya4ey"]
 
 [node name="Node2D" type="Node2D"]
 script = ExtResource("1_eb6dy")
 
-[node name="HTTPRequest" type="HTTPRequest" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="SaveSelectUI" parent="CanvasLayer" instance=ExtResource("4_o6xl0")]
+
+[node name="Node" type="Node" parent="."]
+script = ExtResource("2_tefeu")
+
+[node name="demo" type="Node" parent="."]
+script = ExtResource("11_ya4ey")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(2230, 1210)
 zoom = Vector2(0.25, 0.25)
 script = ExtResource("2_85g3d")
+
+[node name="HTTPRequest" type="HTTPRequest" parent="."]
 
 [node name="TileMapLayer" type="TileMapLayer" parent="."]
 tile_set = ExtResource("3_eb6dy")
@@ -28,6 +40,3 @@ position = Vector2(2900, 103)
 scale = Vector2(2, 2)
 
 [node name="Items" type="Node2D" parent="."]
-
-[node name="demo" type="Node" parent="."]
-script = ExtResource("11_ya4ey")
